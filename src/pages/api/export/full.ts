@@ -108,6 +108,6 @@ export default async function handler(_req: NextApiRequest, res: NextApiResponse
     franchiseModel: data.franchiseModel
   });
   res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-  res.setHeader("Content-Disposition", "attachment; filename=jk-finance-financial-model.xlsx");
+  res.setHeader("Content-Disposition", "attachment; filename=franchise-model-financial-model.xlsx");
   res.send(buffer);
 }

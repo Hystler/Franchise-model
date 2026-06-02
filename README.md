@@ -1,4 +1,4 @@
-# JK Finance: SKU Unit Economics Constructor
+# Franchise Model: SKU Unit Economics Constructor
 
 Локальное Next.js-приложение для финансовой модели фастфуд-франшизы: ручное меню SKU, рецептуры, ингредиенты, упаковка, unit-economics по каждой позиции, Store P&L, CAPEX, OPEX, checks, sensitivity и XLSX-export.
 
@@ -16,23 +16,24 @@
 
 ## Запуск
 
-Проект использует Prisma + PostgreSQL. Для production нужен `DATABASE_URL`; SQLite больше не используется как runtime database.
+Проект использует Prisma + PostgreSQL. Для production нужны `DATABASE_URL` и `DIRECT_URL`; SQLite больше не используется как runtime database.
 
-Создайте `.env` для Prisma CLI и локального запуска:
+Для Supabase используйте pooled connection string для runtime и direct connection string для migrations. Создайте `.env` для Prisma CLI и локального запуска:
 
 ```bash
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require"
-NEXT_PUBLIC_APP_NAME="JK Finance"
+DATABASE_URL="postgresql://postgres.PROJECT_REF:DB_PASSWORD@POOLER_HOST:6543/postgres?pgbouncer=true&sslmode=require"
+DIRECT_URL="postgresql://postgres:DB_PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres?sslmode=require"
+NEXT_PUBLIC_APP_NAME="Franchise Model"
 ```
 
-Локально можно использовать Neon, Supabase, Vercel Postgres или свой PostgreSQL. Затем:
+Локально можно использовать Supabase Postgres или свой PostgreSQL. Затем:
 
 ```bash
 cd app
 npm install
 npm run db:generate
 npm run db:migrate
-npm run db:seed
+npm run db:seed # optional
 npm run dev
 ```
 
@@ -406,38 +407,26 @@ npm run build
 
 ## Deploy to Vercel
 
-1. Создайте GitHub repo и залейте проект:
+1. Репозиторий уже может быть подключен к GitHub/Vercel. Если подключаете заново, импортируйте GitHub repo в Vercel.
 
-```bash
-git init
-git add .
-git commit -m "Initial JK Finance MVP"
-git branch -M main
-git remote add origin <GITHUB_REPO_URL>
-git push -u origin main
-```
-
-2. Создайте PostgreSQL database. Подойдут:
-
-- Vercel Postgres;
-- Neon;
-- Supabase.
-
-3. Добавьте env variable в Vercel:
+2. Создайте Supabase project и добавьте env variables в Vercel:
 
 ```text
-Project -> Settings -> Environment Variables -> DATABASE_URL
+Project -> Settings -> Environment Variables
 ```
 
-Значение должно быть PostgreSQL URL, например:
+Required:
 
-```bash
-postgresql://USER:PASSWORD@HOST:PORT/DATABASE?sslmode=require
+```text
+DATABASE_URL
+DIRECT_URL
+NEXT_PUBLIC_APP_NAME
 ```
 
-4. Импортируйте GitHub repo в Vercel.
+`DATABASE_URL` должен быть Supabase pooled/transaction pooler URL для runtime на Vercel. `DIRECT_URL` должен быть direct Supabase Postgres URL для Prisma migrations. `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` и `SUPABASE_SERVICE_ROLE_KEY` сейчас не нужны, потому что фронтенд не использует Supabase client, а все обращения к базе идут через Prisma на server side.
 
-Build settings:
+3. Build settings:
+
 
 ```text
 Framework: Next.js
@@ -447,7 +436,23 @@ Install command: npm install
 
 Кастомный `vercel.json` не нужен: Vercel корректно определяет Next.js, а `postinstall` запускает `prisma generate`.
 
-5. Примените Prisma migrations и seed. Рекомендуемый ручной вариант:
+4. Примените Prisma migrations к Supabase. Безопасная production-команда:
+
+```bash
+export DATABASE_URL="postgresql://postgres.PROJECT_REF:DB_PASSWORD@POOLER_HOST:6543/postgres?pgbouncer=true&sslmode=require"
+export DIRECT_URL="postgresql://postgres:DB_PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres?sslmode=require"
+npm run db:migrate
+```
+
+`npm run db:migrate` выполняет `prisma migrate deploy` и не делает destructive reset.
+
+Seed отдельный и необязательный:
+
+```bash
+npm run db:seed
+```
+
+Если используете Vercel CLI, можно подтянуть production env и затем выполнить миграции:
 
 ```bash
 npm i -g vercel
@@ -455,25 +460,27 @@ vercel login
 vercel link
 vercel env pull .env
 npm run db:migrate
-npm run db:seed
+npm run db:seed # optional
 ```
 
-Если вы предпочитаете `.env.local`, убедитесь, что Prisma CLI получает тот же `DATABASE_URL` через `.env` или shell env перед запуском `npm run db:migrate`.
+Если вы предпочитаете `.env.local`, убедитесь, что Prisma CLI получает те же `DATABASE_URL` и `DIRECT_URL` через `.env` или shell env перед запуском `npm run db:migrate`.
 
-6. Задеплойте:
+5. Задеплойте:
 
 ```bash
 vercel
 vercel --prod
 ```
 
-DATABASE_URL можно добавить и через CLI:
+Env можно добавить и через CLI:
 
 ```bash
 vercel env add DATABASE_URL
+vercel env add DIRECT_URL
+vercel env add NEXT_PUBLIC_APP_NAME
 ```
 
-7. После production deploy откройте публичный URL и проверьте:
+6. После production deploy откройте публичный URL и проверьте:
 
 - `/`
 - `/menu`
@@ -483,11 +490,13 @@ vercel env add DATABASE_URL
 - `/api/health`
 - `/api/export/full`
 
-Если `/api/health` показывает `db: disconnected`, проверьте `DATABASE_URL`, доступность PostgreSQL и применение миграций.
+Если `/api/health` показывает `db: disconnected`, проверьте `DATABASE_URL`, `DIRECT_URL`, доступность Supabase Postgres и применение миграций.
 
 ## Deployment notes
 
-- Production database provider: PostgreSQL через `DATABASE_URL`.
+- Production database provider: Supabase Postgres через Prisma.
+- Runtime connection: `DATABASE_URL`.
+- Migration/direct connection: `DIRECT_URL`.
 - SQLite-файл не используется на Vercel.
 - `postinstall` выполняет `prisma generate`.
 - `npm run db:migrate` выполняет `prisma migrate deploy`.

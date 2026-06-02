@@ -59,6 +59,7 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
           </div>
         </div>
         <div className="actions">
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a className="button primary" href="/api/export/full"><Download size={16} /> XLSX</a>
         </div>
       </div>

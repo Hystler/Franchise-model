@@ -101,11 +101,12 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
     <Shell>
       <div className="pageHeader">
         <div>
-          <h1>JK Finance: Food Service Financial Model</h1>
+          <h1>Franchise Model: Food Service Financial Model</h1>
           <p>Все неизвестные финансовые значения остаются editable assumptions. Публичное меню импортируется отдельно от расчетов.</p>
         </div>
         <div className="actions">
           <Link className="button" href="/import"><FileUp size={16} /> Импорт</Link>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a className="button primary" href="/api/export/full"><Download size={16} /> XLSX</a>
         </div>
       </div>
@@ -137,6 +138,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           <Link className="button" href="/capex"><PackagePlus size={16} /> Добавить CAPEX</Link>
           <Link className="button" href="/opex">Добавить OPEX</Link>
           <Link className="button" href="/franchise">Открыть Franchise Mode</Link>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a className="button" href="/api/export/full"><Download size={16} /> Export XLSX</a>
         </div>
       </section>
@@ -305,7 +307,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <nav className="nav">
-        <Link href="/" className="brand"><Gauge size={18} /> JK Finance</Link>
+        <Link href="/" className="brand"><Gauge size={18} /> Franchise Model</Link>
         <Link href="/menu"><Table2 size={16} /> SKU</Link>
         <Link href="/ingredients"><Wheat size={16} /> Ingredients</Link>
         <Link href="/store">Store Model</Link>
