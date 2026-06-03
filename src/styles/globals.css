@@ -1,34 +1,34 @@
 :root {
-  --bg: #050506;
-  --bg-2: #090A0C;
-  --bg-3: #0D0F12;
-  --card: #111317;
-  --card-2: #15181D;
-  --card-3: #1A1D23;
-  --elevated: #1D2128;
-  --elevated-2: #22262E;
+  --bg: #050507;
+  --bg-2: #080A0D;
+  --bg-3: #0D1015;
+  --card: #12161C;
+  --card-2: #171B22;
+  --card-3: #1B2028;
+  --elevated: #202632;
+  --elevated-2: #252B36;
   --surface: rgba(255,255,255,0.04);
   --surface-muted: rgba(255,255,255,0.065);
   --surface-strong: rgba(156,203,255,0.08);
   --border: rgba(255,255,255,0.12);
-  --border-soft: rgba(255,255,255,0.08);
+  --border-soft: rgba(255,255,255,0.07);
   --text: #F5F7FA;
-  --text-secondary: #A6ADB8;
-  --text-muted: #6F7782;
-  --primary: #6EA8FE;
-  --primary-dark: #4D83D5;
-  --accent-cold: #9CCBFF;
-  --steel: #8E99A8;
-  --steel-dark: #697381;
+  --text-secondary: #AAB2C0;
+  --text-muted: #737C8A;
+  --primary: #8EC5FF;
+  --primary-dark: #5F8FCF;
+  --accent-cold: #8EC5FF;
+  --steel: #9BA4B2;
+  --steel-dark: #737C8A;
   --silver: #D7DCE3;
   --red: #E06A5F;
   --red-dark: #7A2D26;
   --red-soft: rgba(224,106,95,0.15);
-  --success: #72B879;
+  --success: #76C893;
   --success-dark: #5D9D62;
-  --warning: #D6A85C;
-  --shadow: 0 24px 80px rgba(0,0,0,0.46);
-  --shadow-soft: 0 16px 48px rgba(0,0,0,0.34);
+  --warning: #E0B15E;
+  --shadow: 0 28px 90px rgba(0,0,0,0.48);
+  --shadow-soft: 0 18px 54px rgba(0,0,0,0.36);
   --radius-card: 20px;
   --radius-control: 13px;
   --accent-red: var(--red);
@@ -41,9 +41,9 @@ body {
   margin: 0;
   min-height: 100%;
   background:
-    radial-gradient(circle at 18% -8%, rgba(110,168,254,0.16), transparent 32%),
-    radial-gradient(circle at 82% 4%, rgba(142,153,168,0.10), transparent 30%),
-    radial-gradient(circle at 50% 110%, rgba(114,184,121,0.06), transparent 34%),
+    radial-gradient(circle at 18% -8%, rgba(142,197,255,0.12), transparent 34%),
+    radial-gradient(circle at 82% 4%, rgba(155,164,178,0.08), transparent 30%),
+    radial-gradient(circle at 50% 112%, rgba(95,143,207,0.055), transparent 38%),
     linear-gradient(180deg, var(--bg), var(--bg-2) 44%, var(--bg));
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -54,7 +54,7 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.032;
+  opacity: 0.026;
   background-image:
     linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px);
@@ -67,7 +67,7 @@ body::after {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: 0.026;
+  opacity: 0.022;
   background-image:
     repeating-linear-gradient(0deg, rgba(255,255,255,0.8) 0, rgba(255,255,255,0.8) 1px, transparent 1px, transparent 4px);
 }
@@ -115,7 +115,7 @@ label small { color: var(--text-muted); font-weight: 500; line-height: 1.35; }
 button, .button {
   min-height: 42px;
   border: 1px solid var(--border-soft);
-  background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+  background: linear-gradient(180deg, rgba(255,255,255,0.064), rgba(255,255,255,0.028));
   color: var(--text);
   border-radius: var(--radius-control);
   padding: 10px 15px;
@@ -130,7 +130,7 @@ button, .button {
 button:hover, .button:hover {
   transform: translateY(-1px);
   border-color: rgba(156,203,255,0.36);
-  background: linear-gradient(180deg, rgba(110,168,254,0.12), rgba(255,255,255,0.04));
+  background: linear-gradient(180deg, rgba(142,197,255,0.105), rgba(255,255,255,0.035));
 }
 button:disabled {
   cursor: not-allowed;
@@ -139,11 +139,11 @@ button:disabled {
 }
 .button.primary, button.primary {
   background:
-    linear-gradient(180deg, rgba(156,203,255,0.16), rgba(110,168,254,0.08)),
-    #1D2128;
-  border-color: rgba(156,203,255,0.38);
+    linear-gradient(180deg, rgba(142,197,255,0.13), rgba(95,143,207,0.075)),
+    #202632;
+  border-color: rgba(142,197,255,0.32);
   color: var(--text);
-  box-shadow: 0 16px 38px rgba(36,86,160,0.20);
+  box-shadow: 0 16px 38px rgba(36,86,160,0.16);
 }
 button.danger, .button.danger {
   background: linear-gradient(180deg, rgba(224,106,95,0.18), rgba(122,45,38,0.20));
@@ -159,7 +159,7 @@ button.danger, .button.danger {
   align-items: center;
   gap: 8px;
   padding: 14px 22px;
-  background: rgba(5,5,6,0.82);
+  background: rgba(5,5,7,0.84);
   border-bottom: 1px solid var(--border-soft);
   overflow-x: auto;
   backdrop-filter: blur(18px);
@@ -179,8 +179,8 @@ button.danger, .button.danger {
 .nav a:hover { color: var(--text); background: rgba(255,255,255,0.055); border-color: var(--border-soft); }
 .nav a.active {
   color: var(--text);
-  background: rgba(110,168,254,0.12);
-  border-color: rgba(156,203,255,0.24);
+  background: rgba(142,197,255,0.105);
+  border-color: rgba(142,197,255,0.23);
 }
 .brand {
   font-weight: 950;
@@ -193,8 +193,8 @@ button.danger, .button.danger {
 .navAction { color: var(--text-secondary); }
 .navAction.primaryNavAction {
   color: var(--text);
-  border-color: rgba(156,203,255,0.30) !important;
-  background: rgba(110,168,254,0.09);
+  border-color: rgba(142,197,255,0.27) !important;
+  background: rgba(142,197,255,0.075);
 }
 .subnav {
   position: sticky;
@@ -246,12 +246,12 @@ button.danger, .button.danger {
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025)),
-    linear-gradient(135deg, rgba(110,168,254,0.07), transparent 52%);
+    linear-gradient(180deg, rgba(255,255,255,0.048), rgba(255,255,255,0.022)),
+    linear-gradient(135deg, rgba(142,197,255,0.052), transparent 56%);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
-  padding: 18px;
-  min-height: 116px;
+  padding: 20px;
+  min-height: 124px;
   display: grid;
   align-content: space-between;
   box-shadow: var(--shadow-soft);
@@ -260,9 +260,9 @@ button.danger, .button.danger {
   content: "";
   position: absolute;
   inset: 0 auto auto 0;
-  width: 76px;
+  width: 52px;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent-cold), transparent);
+  background: linear-gradient(90deg, rgba(142,197,255,0.8), transparent);
 }
 .metric span {
   display: flex;
@@ -280,14 +280,14 @@ button.danger, .button.danger {
 
 .band, .inputGroup, .modal {
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.052), rgba(255,255,255,0.024)),
-    linear-gradient(135deg, rgba(110,168,254,0.042), transparent 58%),
+    linear-gradient(180deg, rgba(255,255,255,0.046), rgba(255,255,255,0.022)),
+    linear-gradient(135deg, rgba(142,197,255,0.028), transparent 60%),
     var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow);
 }
-.band { padding: 21px; margin: 18px 0; }
+.band { padding: 24px; margin: 18px 0; }
 section[id] { scroll-margin-top: 132px; }
 .band h2 { margin: 0 0 14px; font-size: 20px; color: var(--text); }
 .sectionHead { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 14px; }
@@ -295,6 +295,34 @@ section[id] { scroll-margin-top: 132px; }
 .sectionHead span { color: var(--text-muted); font-size: 13px; }
 .sectionKpi { color: var(--silver); font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .chart { height: 290px; }
+.dashboardChartStack { display: grid; gap: 18px; }
+.chartPane {
+  min-height: 206px;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  padding: 14px 14px 8px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.016)),
+    rgba(5,5,7,0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035);
+}
+.chartPaneTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 4px;
+  color: var(--silver);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.chartPaneTitle span {
+  color: var(--text-muted);
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: 0;
+}
 .twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 
 .checks { display: grid; gap: 10px; }

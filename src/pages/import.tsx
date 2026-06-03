@@ -1,6 +1,5 @@
 import { useState } from "react";
-import * as XLSX from "xlsx";
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 
 const templates = [
   { kind: "menu", label: "Меню", file: "menu_template.csv" },
@@ -13,6 +12,7 @@ export default function ImportPage() {
 
   async function upload(kind: string, file?: File) {
     if (!file) return;
+    const XLSX = await import("xlsx");
     const workbook = XLSX.read(await file.arrayBuffer(), { type: "array" });
     const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
     const res = await fetch(`/api/import/${kind}`, {

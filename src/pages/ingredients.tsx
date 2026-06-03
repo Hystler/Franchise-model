@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Edit3, PackagePlus, Plus, Search, Trash2 } from "lucide-react";
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 import { loadModel } from "@/lib/model";
 import { rub } from "@/lib/format";
 
@@ -176,10 +176,10 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
           <label>Название<input value={ingredientEditor.name} onChange={(e) => setIngredientEditor({ ...ingredientEditor, name: e.target.value })} /></label>
           <label>Категория<input value={ingredientEditor.category ?? ""} onChange={(e) => setIngredientEditor({ ...ingredientEditor, category: e.target.value })} /></label>
           <label>Поставщик<input value={ingredientEditor.supplier ?? ""} onChange={(e) => setIngredientEditor({ ...ingredientEditor, supplier: e.target.value })} /></label>
-          <label>Закупочная цена, ₽<input type="number" min={0} step={10} value={ingredientEditor.purchasePrice} onChange={(e) => setIngredientEditor({ ...ingredientEditor, purchasePrice: Number(e.target.value) })} /></label>
+          <label>Закупочная цена, ₽<input type="number" min={0} step={0.01} value={ingredientEditor.purchasePrice} onChange={(e) => setIngredientEditor({ ...ingredientEditor, purchasePrice: Number(e.target.value) })} /></label>
           <label>Единица закупки<select value={ingredientEditor.purchaseUnit} onChange={(e) => setIngredientEditor({ ...ingredientEditor, purchaseUnit: e.target.value })}><option value="kg">кг</option><option value="g">г</option><option value="liter">л</option><option value="ml">мл</option><option value="piece">шт.</option></select></label>
-          <label>Полезный выход, %<input type="number" min={0} max={100} step={1} value={ingredientEditor.edibleYieldPercent ?? 100} onChange={(e) => setIngredientEditor({ ...ingredientEditor, edibleYieldPercent: Number(e.target.value) })} /></label>
-          <label>Потери хранения, %<input type="number" min={0} max={100} step={1} value={ingredientEditor.storageLossPercent ?? 0} onChange={(e) => setIngredientEditor({ ...ingredientEditor, storageLossPercent: Number(e.target.value) })} /></label>
+          <label>Полезный выход, %<input type="number" min={0} max={100} step={0.1} value={ingredientEditor.edibleYieldPercent ?? 100} onChange={(e) => setIngredientEditor({ ...ingredientEditor, edibleYieldPercent: Number(e.target.value) })} /></label>
+          <label>Потери хранения, %<input type="number" min={0} max={100} step={0.1} value={ingredientEditor.storageLossPercent ?? 0} onChange={(e) => setIngredientEditor({ ...ingredientEditor, storageLossPercent: Number(e.target.value) })} /></label>
           <label>Источник<select value={ingredientEditor.source} onChange={(e) => setIngredientEditor({ ...ingredientEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED</option><option>ASSUMPTION</option></select></label>
           <label className="wide">Комментарий<textarea value={ingredientEditor.comment ?? ""} onChange={(e) => setIngredientEditor({ ...ingredientEditor, comment: e.target.value })} /></label>
         </EditorModal>
@@ -188,7 +188,7 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
       {packagingEditor && (
         <EditorModal title={packagingEditor.id ? "Редактировать упаковку" : "Добавить упаковку"} onClose={() => setPackagingEditor(null)} onSave={savePackaging}>
           <label>Название<input value={packagingEditor.name} onChange={(e) => setPackagingEditor({ ...packagingEditor, name: e.target.value })} /></label>
-          <label>Стоимость за штуку, ₽<input type="number" min={0} step={1} value={packagingEditor.costPerUnit} onChange={(e) => setPackagingEditor({ ...packagingEditor, costPerUnit: Number(e.target.value) })} /></label>
+          <label>Стоимость за штуку, ₽<input type="number" min={0} step={0.01} value={packagingEditor.costPerUnit} onChange={(e) => setPackagingEditor({ ...packagingEditor, costPerUnit: Number(e.target.value) })} /></label>
           <label>Поставщик<input value={packagingEditor.supplier ?? ""} onChange={(e) => setPackagingEditor({ ...packagingEditor, supplier: e.target.value })} /></label>
           <label>Источник<select value={packagingEditor.source} onChange={(e) => setPackagingEditor({ ...packagingEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED</option><option>ASSUMPTION</option></select></label>
           <label className="wide">Комментарий<textarea value={packagingEditor.comment ?? ""} onChange={(e) => setPackagingEditor({ ...packagingEditor, comment: e.target.value })} /></label>

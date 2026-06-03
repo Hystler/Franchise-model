@@ -1,12 +1,11 @@
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 import { CapexSection, OpexSection, SensitivitySection } from "@/components/store-model-sections";
 import { loadModel } from "@/lib/model";
 import { CHART_COLORS, chartAxisProps, chartGridProps, chartTooltipProps } from "@/lib/charts";
 import { num, percent, rub } from "@/lib/format";
 import {
-  Bar,
   CartesianGrid,
-  ComposedChart,
+  Legend,
   Line,
   LineChart,
   ReferenceLine,
@@ -41,6 +40,7 @@ export default function StorePage({ store, tax, model, diagnostics, capexRows, o
   }));
   const cashflowRows = model.cumulativeCashflow.slice(0, 24);
   const storeChecks = checks.filter((check: any) => ["Store Model", "CAPEX", "OPEX", "Missing data"].includes(check.category));
+  const cashflowLineColor = forecast.some((row) => row.cashflow < 0) ? CHART_COLORS.red : CHART_COLORS.warning;
 
   return (
     <Shell>
@@ -66,19 +66,34 @@ export default function StorePage({ store, tax, model, diagnostics, capexRows, o
           <Metric title="Payback" value={model.initialInvestment > 0 && model.monthlyRevenue > 0 && model.operatingCashflow > 0 && model.paybackMonth ? `${model.paybackMonth} мес.` : "n/a"} />
           <Metric title="Break-even / день" value={model.breakEvenOrdersPerDay == null ? "n/a" : `${Math.ceil(model.breakEvenOrdersPerDay)} заказов`} />
         </div>
-        <div className="chart">
-          <ResponsiveContainer width="100%" height={280}>
-            <ComposedChart data={forecast} margin={{ top: 12, right: 18, bottom: 6, left: 8 }}>
-              <CartesianGrid {...chartGridProps} />
-              <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `M${value}`} />
-              <YAxis yAxisId="left" {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={78} />
-              <YAxis yAxisId="right" orientation="right" {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={78} />
-              <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
-              <Bar yAxisId="left" dataKey="revenue" name="Выручка" fill={CHART_COLORS.blueSoft} radius={[8, 8, 0, 0]} />
-              <Line yAxisId="right" type="monotone" dataKey="ebitda" name="EBITDA" stroke={CHART_COLORS.olive} strokeWidth={2.5} dot={false} />
-              <Line yAxisId="right" type="monotone" dataKey="cashflow" name="Cashflow" stroke={CHART_COLORS.warning} strokeWidth={2.5} dot={false} />
-            </ComposedChart>
-          </ResponsiveContainer>
+        <div className="dashboardChartStack">
+          <div className="chartPane">
+            <div className="chartPaneTitle">Выручка <span>12 месяцев</span></div>
+            <ResponsiveContainer width="100%" height={190}>
+              <LineChart data={forecast} margin={{ top: 10, right: 20, bottom: 4, left: 8 }}>
+                <CartesianGrid {...chartGridProps} />
+                <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `M${value}`} />
+                <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={78} />
+                <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
+                <Line type="monotone" dataKey="revenue" name="Выручка" stroke={CHART_COLORS.blueSoft} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft, stroke: CHART_COLORS.surface, strokeWidth: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="chartPane">
+            <div className="chartPaneTitle">EBITDA и Cashflow <span>операционные линии</span></div>
+            <ResponsiveContainer width="100%" height={205}>
+              <LineChart data={forecast} margin={{ top: 10, right: 20, bottom: 4, left: 8 }}>
+                <CartesianGrid {...chartGridProps} />
+                <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `M${value}`} />
+                <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={78} />
+                <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
+                <Legend verticalAlign="top" height={24} />
+                <ReferenceLine y={0} stroke={CHART_COLORS.grid} strokeDasharray="4 5" />
+                <Line type="monotone" dataKey="ebitda" name="EBITDA" stroke={CHART_COLORS.olive} strokeWidth={2.8} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.olive, stroke: CHART_COLORS.surface, strokeWidth: 2 }} />
+                <Line type="monotone" dataKey="cashflow" name="Cashflow" stroke={cashflowLineColor} strokeWidth={2.8} dot={false} activeDot={{ r: 5, fill: cashflowLineColor, stroke: CHART_COLORS.surface, strokeWidth: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </section>
 
@@ -94,17 +109,17 @@ export default function StorePage({ store, tax, model, diagnostics, capexRows, o
           <Input name="avgOrdersPerDay" label="Заказы" unit="заказов / день" value={store.avgOrdersPerDay} min={0} step={1} help="Среднее число заказов в день" />
           <Input name="avgItemsPerOrder" label="SKU / заказ" unit="шт" value={store.avgItemsPerOrder} min={0.1} step={0.1} help="Среднее количество позиций в одном заказе. Например: 1.4" />
           <Input name="avgCheck" label="Средний чек" unit="₽" value={store.avgCheck} min={0} step={10} help="Средний чек одного заказа" />
-          <Input name="deliveryShare" label="Доля доставки" unit="%" value={store.deliveryShare} min={0} max={100} step={1} help="Доля заказов на доставку. 10 = 10%" />
-          <Input name="aggregatorShare" label="Доля агрегаторов" unit="%" value={store.aggregatorShare} min={0} max={100} step={1} help="Доля доставки через агрегаторы. 50 = 50%" />
-          <Input name="acquiringRate" label="Эквайринг" unit="%" value={store.acquiringRate} min={0} max={100} step={1} help="Комиссия эквайринга. 2.5 = 2.5%" />
-          <Input name="aggregatorCommissionRate" label="Комиссия агрегатора" unit="%" value={store.aggregatorCommissionRate} min={0} max={100} step={1} help="Комиссия агрегатора от заказа. 25 = 25%" />
-          <Input name="deliveryLogisticsCostPerOrder" label="Логистика / заказ" unit="₽ / заказ" value={store.deliveryLogisticsCostPerOrder} min={0} step={10} help="Переменная стоимость доставки на один заказ доставки" />
-          <Input name="marketingCostPerItem" label="Маркетинг / SKU" unit="₽ / SKU" value={store.marketingCostPerItem} min={0} step={10} help="Переменный маркетинг на одну проданную позицию" />
+          <Input name="deliveryShare" label="Доля доставки" unit="%" value={store.deliveryShare} min={0} max={100} step={0.1} help="Доля заказов на доставку. 10 = 10%" />
+          <Input name="aggregatorShare" label="Доля агрегаторов" unit="%" value={store.aggregatorShare} min={0} max={100} step={0.1} help="Доля доставки через агрегаторы. 50 = 50%" />
+          <Input name="acquiringRate" label="Эквайринг" unit="%" value={store.acquiringRate} min={0} max={100} step={0.1} help="Комиссия эквайринга. 2.5 = 2.5%" />
+          <Input name="aggregatorCommissionRate" label="Комиссия агрегатора" unit="%" value={store.aggregatorCommissionRate} min={0} max={100} step={0.1} help="Комиссия агрегатора от заказа. 25 = 25%" />
+          <Input name="deliveryLogisticsCostPerOrder" label="Логистика / заказ" unit="₽ / заказ" value={store.deliveryLogisticsCostPerOrder} min={0} step={1} help="Переменная стоимость доставки на один заказ доставки" />
+          <Input name="marketingCostPerItem" label="Маркетинг / SKU" unit="₽ / SKU" value={store.marketingCostPerItem} min={0} step={1} help="Переменный маркетинг на одну проданную позицию" />
           <Input name="loanPaymentsMonthly" label="Платежи по займам" unit="₽ / мес" value={store.loanPaymentsMonthly} min={0} step={1000} help="Ежемесячные платежи по займам, если есть" />
           <Input name="ownerWithdrawalsMonthly" label="Выплаты собственнику" unit="₽ / мес" value={store.ownerWithdrawalsMonthly} min={0} step={1000} help="Выплаты собственнику, если учитываются в cashflow" />
-          <Input name="revenueTaxRate" label="Налог с выручки" unit="%" value={tax?.revenueTaxRate ?? ""} min={0} max={100} step={1} help="Налог с выручки. 6 = 6%" />
-          <Input name="profitTaxRate" label="Налог на прибыль" unit="%" value={tax?.profitTaxRate ?? ""} min={0} max={100} step={1} help="Налог с прибыли. 20 = 20%" />
-          <Input name="vatRate" label="НДС" unit="%" value={tax?.vatRate ?? ""} min={0} max={100} step={1} help="НДС. 20 = 20%. Сейчас справочное поле, не включается в tax paid автоматически" />
+          <Input name="revenueTaxRate" label="Налог с выручки" unit="%" value={tax?.revenueTaxRate ?? ""} min={0} max={100} step={0.1} help="Налог с выручки. 6 = 6%" />
+          <Input name="profitTaxRate" label="Налог на прибыль" unit="%" value={tax?.profitTaxRate ?? ""} min={0} max={100} step={0.1} help="Налог с прибыли. 20 = 20%" />
+          <Input name="vatRate" label="НДС" unit="%" value={tax?.vatRate ?? ""} min={0} max={100} step={0.1} help="НДС. 20 = 20%. Сейчас справочное поле, не включается в уплаченные налоги автоматически" />
           <Input name="otherTaxes" label="Прочие налоги" unit="₽ / мес" value={tax?.otherTaxes ?? 0} min={0} step={1000} help="Прочие налоги и обязательные платежи в месяц" />
         </div>
         <p className="muted">НДС требует отдельной налоговой логики, сейчас используется как справочное поле или упрощенное допущение.</p>

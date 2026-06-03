@@ -381,7 +381,7 @@ export function runChecks(
   if (products.length && model.packagingTotal === 0) checks.push({ severity: "warning", code: "ZERO_PACKAGING", message: "Упаковка = 0 при наличии SKU", category: "Missing data" });
   if (store.avgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "AVG_ITEMS_ZERO", message: "SKU / заказ не может быть 0, иначе себестоимость и упаковка могут считаться некорректно. Укажите среднее количество позиций в одном заказе.", category: "Store Model" });
   const month6 = model.cumulativeCashflow.find((row) => row.month === 6);
-  if (month6 && month6.cumulativeCashflow < 0) checks.push({ severity: "warning", code: "NEGATIVE_CF_MONTH_6", message: "Cashflow отрицательный после 6 месяцев", category: "Store Model" });
+  if (month6 && month6.cumulativeCashflow < 0) checks.push({ severity: "warning", code: "NEGATIVE_CF_MONTH_6", message: "Накопленный cashflow остаётся отрицательным после 6 месяцев", category: "Store Model" });
   if (tax.revenueTaxRate == null && tax.profitTaxRate == null && tax.vatRate == null) checks.push({ severity: "warning", code: "MISSING_TAX", message: "Не задана налоговая assumption", category: "Missing data" });
   capex.filter((item) => item.amount > 0 && !item.usefulLifeMonths).forEach((item) => {
     checks.push({ severity: "warning", code: "MISSING_DEPRECIATION_LIFE", message: `${item.category}: не задан срок амортизации`, category: "CAPEX" });

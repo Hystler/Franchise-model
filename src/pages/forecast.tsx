@@ -9,11 +9,12 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Shell } from "@/pages/index";
+import { buildForecast, type ForecastInputs } from "@/calculations/forecast";
+import { Shell } from "@/components/shell";
 import { CHART_COLORS, chartAxisProps, chartGridProps, chartTooltipProps } from "@/lib/charts";
 import { num, rub } from "@/lib/format";
 
-const defaults = {
+const defaults: ForecastInputs = {
   months: 12,
   startOrdersPerDay: 125,
   avgCheck: 520,
@@ -49,8 +50,8 @@ export default function ForecastPage() {
           <ForecastInput label="Стартовые заказы" unit="в день" value={inputs.startOrdersPerDay} min={0} step={1} onChange={(value) => setInputs({ ...inputs, startOrdersPerDay: value })} />
           <ForecastInput label="Средний чек" unit="₽" value={inputs.avgCheck} min={0} step={10} onChange={(value) => setInputs({ ...inputs, avgCheck: value })} />
           <ForecastInput label="Рабочие дни" unit="дней / мес" value={inputs.workingDays} min={1} max={31} step={1} onChange={(value) => setInputs({ ...inputs, workingDays: Math.round(value) })} />
-          <ForecastInput label="Рост заказов" unit="% / мес" value={inputs.ordersGrowth} step={0.1} onChange={(value) => setInputs({ ...inputs, ordersGrowth: value })} />
-          <ForecastInput label="Рост среднего чека" unit="% / мес" value={inputs.checkGrowth} step={0.1} onChange={(value) => setInputs({ ...inputs, checkGrowth: value })} />
+          <ForecastInput label="Рост заказов" unit="% / мес" value={inputs.ordersGrowth} min={0} max={100} step={0.1} onChange={(value) => setInputs({ ...inputs, ordersGrowth: value })} />
+          <ForecastInput label="Рост среднего чека" unit="% / мес" value={inputs.checkGrowth} min={0} max={100} step={0.1} onChange={(value) => setInputs({ ...inputs, checkGrowth: value })} />
           <label className="checkLine"><input type="checkbox" checked={inputs.seasonality} onChange={(event) => setInputs({ ...inputs, seasonality: event.target.checked })} /> Учитывать сезонность</label>
           <div className="rowActions wideActions">
             <button type="button" className="primary" disabled title="Интеграция с Store Model будет добавлена следующим этапом">Использовать как план продаж</button>
@@ -117,23 +118,6 @@ function ForecastInput({ label, unit, value, min, max, step, onChange }: { label
       <input type="number" value={value} min={min} max={max} step={step ?? 1} onChange={(event) => onChange(Number(event.target.value))} />
     </label>
   );
-}
-
-function buildForecast(input: typeof defaults) {
-  return Array.from({ length: input.months }, (_, index) => {
-    const month = index + 1;
-    const seasonalFactor = input.seasonality ? 1 + 0.08 * Math.sin(((month - 2) / 12) * Math.PI * 2) : 1;
-    const ordersPerDay = input.startOrdersPerDay * Math.pow(1 + input.ordersGrowth / 100, index) * seasonalFactor;
-    const avgCheck = input.avgCheck * Math.pow(1 + input.checkGrowth / 100, index);
-    const revenue = ordersPerDay * avgCheck * input.workingDays;
-    return {
-      month,
-      ordersPerDay,
-      avgCheck,
-      revenue,
-      comment: input.seasonality ? "С учётом сезонности" : "Линейный сценарий"
-    };
-  });
 }
 
 function compactRub(value: number) {

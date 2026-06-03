@@ -46,7 +46,7 @@ export function CapexSection({ rows: initialRows }: { rows: RowMap[] }) {
       </div>
       <form className="gridForm compactForm" method="post" action="/api/capex">
         <Input name="category" label="Статья" help="Например: кухонное оборудование" />
-        <Input name="amount" label="Сумма, ₽" help="Сумма CAPEX" type="number" step={10000} />
+        <Input name="amount" label="Сумма, ₽" help="Сумма CAPEX" type="number" step={1000} />
         <Input name="usefulLifeMonths" label="Амортизация, мес" help="Например: 36" type="number" step={1} />
         <Input name="supplierComment" label="Комментарий" help="Поставщик или комментарий" />
         <label>Обязательно<select name="required" defaultValue="true"><option value="true">Да</option><option value="false">Нет</option></select></label>
@@ -71,7 +71,7 @@ export function CapexSection({ rows: initialRows }: { rows: RowMap[] }) {
               return (
                 <tr key={row.id}>
                   <td><input name="category" defaultValue={capexCategory(row.category)} title={capexCategory(row.category)} aria-label="Статья" /></td>
-                  <td><input name="amount" defaultValue={row.amount} type="number" min="0" step="10000" aria-label="Сумма" /></td>
+                  <td><input name="amount" defaultValue={row.amount} type="number" min="0" step="1000" aria-label="Сумма" /></td>
                   <td><input name="usefulLifeMonths" defaultValue={row.usefulLifeMonths ?? ""} type="number" min="1" step="1" aria-label="Амортизация" /></td>
                   <td><input name="supplierComment" defaultValue={capexComment(row.supplierComment)} title={capexComment(row.supplierComment)} aria-label="Комментарий" /></td>
                   <td><select name="required" defaultValue={String(row.required)}><option value="true">Да</option><option value="false">Нет</option></select></td>
@@ -128,7 +128,7 @@ export function OpexSection({ rows: initialRows }: { rows: RowMap[] }) {
       </div>
       <form className="gridForm compactForm" method="post" action="/api/opex">
         <Input name="category" label="Статья" help="Например: аренда, ФОТ, коммунальные" />
-        <Input name="amount" label="Сумма или ставка" help="₽ / мес, ₽ / заказ, ₽ / SKU или %" type="number" step={1000} />
+        <Input name="amount" label="Сумма или ставка" help="₽ / мес, ₽ / заказ, ₽ / SKU или %" type="number" step={0.1} />
         <label>Тип<select name="behavior" defaultValue="FIXED"><option value="FIXED">Постоянный</option><option value="VARIABLE">Переменный</option></select></label>
         <label>Драйвер<select name="driver" defaultValue="FIXED"><option value="FIXED">Фиксированный</option><option value="LINKED_TO_REVENUE">От выручки</option><option value="LINKED_TO_ORDERS">От заказов</option><option value="LINKED_TO_ITEMS">От SKU</option></select></label>
         <label className="wide">Комментарий<input name="comment" placeholder="Комментарий" /></label>
@@ -142,7 +142,7 @@ export function OpexSection({ rows: initialRows }: { rows: RowMap[] }) {
               return (
                 <tr key={row.id}>
                   <td><input name="category" defaultValue={opexCategory(row.category)} title={opexCategory(row.category)} aria-label="Статья" /></td>
-                  <td><input name="amount" defaultValue={row.amount} type="number" min="0" step={row.driver === "LINKED_TO_REVENUE" ? "1" : "1000"} aria-label="Сумма" /></td>
+                  <td><input name="amount" defaultValue={row.amount} type="number" min="0" step={row.driver === "LINKED_TO_REVENUE" ? "0.1" : "1000"} aria-label="Сумма" /></td>
                   <td><select name="behavior" defaultValue={row.behavior}><option value="FIXED">Постоянный</option><option value="VARIABLE">Переменный</option></select></td>
                   <td><select name="driver" defaultValue={row.driver}><option value="FIXED">Фиксированный</option><option value="LINKED_TO_REVENUE">От выручки</option><option value="LINKED_TO_ORDERS">От заказов</option><option value="LINKED_TO_ITEMS">От SKU</option></select></td>
                   <td><input name="comment" defaultValue={opexComment(row.comment)} title={opexComment(row.comment)} aria-label="Комментарий" /></td>

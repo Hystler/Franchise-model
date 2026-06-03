@@ -22,6 +22,7 @@ import { calculateSensitivity } from "@/calculations/sensitivity";
 import { buildModelWorkbook } from "@/exports/workbook";
 import { buildSkuMarginRanking, truncateSkuName } from "@/lib/charts";
 import { formatPercent, formatRub } from "@/lib/format";
+import { buildForecast } from "@/calculations/forecast";
 import type { CapexInput, OpexInput, ProductInput, StoreInputs, StoreModelResult } from "@/models/financial";
 
 const store: StoreInputs = {
@@ -220,6 +221,7 @@ describe("financial calculations", () => {
 
   it("converts percent inputs to decimals", () => {
     expect(percentDecimal(1)).toBe(0.01);
+    expect(percentDecimal(2.5)).toBe(0.025);
     expect(percentDecimal(50)).toBe(0.5);
   });
 
@@ -232,13 +234,47 @@ describe("financial calculations", () => {
     expect(formatPercent(28.23)).toBe("28,2 %");
   });
 
-  it("sets percentage input steps to one", () => {
+  it("sets percentage input steps to decimal precision", () => {
     const storePage = readFileSync("src/pages/store.tsx", "utf8");
     const franchisePage = readFileSync("src/pages/franchise.tsx", "utf8");
-    expect(storePage).toMatch(/name="deliveryShare"[\s\S]*step=\{1\}/);
-    expect(storePage).toMatch(/name="revenueTaxRate"[\s\S]*step=\{1\}/);
+    expect(storePage).toMatch(/name="deliveryShare"[\s\S]*step=\{0\.1\}/);
+    expect(storePage).toMatch(/name="revenueTaxRate"[\s\S]*step=\{0\.1\}/);
     expect(franchisePage).toContain("function PercentInput");
-    expect(franchisePage).toContain("step={1}");
+    expect(franchisePage).toContain("step={0.1}");
+  });
+
+  it("preserves decimal store inputs in operating calculations", () => {
+    const decimalStore = {
+      ...store,
+      workingDaysPerMonth: 30,
+      avgOrdersPerDay: 100,
+      avgItemsPerOrder: 1.4,
+      avgCheck: 500,
+      deliveryShare: 100,
+      aggregatorShare: 100,
+      acquiringRate: 2.5,
+      aggregatorCommissionRate: 22.5,
+      deliveryLogisticsCostPerOrder: 0,
+      marketingCostPerItem: 0
+    };
+    const model = calculateStoreModel([], decimalStore, [], [], {});
+    expect(model.monthlyItemsSold).toBeCloseTo(4200);
+    expect(model.acquiringCost).toBeCloseTo(37_500);
+    expect(model.aggregatorCommissionCost).toBeCloseTo(337_500);
+  });
+
+  it("supports decimal growth in forecast scenarios", () => {
+    const rows = buildForecast({
+      months: 2,
+      startOrdersPerDay: 100,
+      avgCheck: 500,
+      workingDays: 30,
+      ordersGrowth: 1.5,
+      checkGrowth: 1.5,
+      seasonality: false
+    });
+    expect(rows[1].ordersPerDay).toBeCloseTo(101.5);
+    expect(rows[1].avgCheck).toBeCloseTo(507.5);
   });
 
   it("calculates revenue tax as percent input", () => {
@@ -592,7 +628,7 @@ describe("financial calculations", () => {
   it("main dashboard contains KPI cards and chart sections", () => {
     const dashboard = readFileSync("src/pages/index.tsx", "utf8");
     expect(dashboard).toContain("Выручка / мес");
-    expect(dashboard).toContain("Payback Franchise");
+    expect(dashboard).toContain("Payback франшизы");
     expect(dashboard).toContain("Заполненность модели");
   });
 });

@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 import * as XLSX from "xlsx";
 
 const baseUrl = "https://demo-brand.com/";
-const outDir = path.join(process.cwd(), "public", "scrape_artifacts");
+const outDir = path.join(process.cwd(), "scrape_artifacts");
 const rawDir = path.join(outDir, "raw");
 
 type MenuRow = {

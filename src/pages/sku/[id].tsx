@@ -2,7 +2,7 @@ import type { GetServerSideProps } from "next";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Edit3, Plus, Trash2 } from "lucide-react";
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 import { calculateRecipeItemCost, ingredientCostPerBaseUnit } from "@/calculations/financial";
 import { loadModel } from "@/lib/model";
 import { percent, rub } from "@/lib/format";
@@ -236,7 +236,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
         <Editor title="Редактировать SKU" onClose={() => setSkuEditor(null)} onSave={saveSku}>
           <label>Название<input value={skuEditor.name} onChange={(e) => setSkuEditor({ ...skuEditor, name: e.target.value })} /></label>
           <label>Категория<input value={skuEditor.category} onChange={(e) => setSkuEditor({ ...skuEditor, category: e.target.value })} /></label>
-          <label>Цена, ₽<input type="number" min={0} step={10} value={skuEditor.salePrice} onChange={(e) => setSkuEditor({ ...skuEditor, salePrice: Number(e.target.value) })} /></label>
+          <label>Цена, ₽<input type="number" min={0} step={1} value={skuEditor.salePrice} onChange={(e) => setSkuEditor({ ...skuEditor, salePrice: Number(e.target.value) })} /></label>
           <label>Источник<select value={skuEditor.source} onChange={(e) => setSkuEditor({ ...skuEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED_MENU</option><option>ASSUMPTION</option></select></label>
           <label className="wide">Описание<textarea value={skuEditor.description ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, description: e.target.value })} /></label>
           <label>URL изображения<input value={skuEditor.imageUrl ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, imageUrl: e.target.value })} /></label>
@@ -257,14 +257,14 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
             <>
               <label>Новый ингредиент<input value={recipeEditor.newIngredient.name} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, name: e.target.value } })} /></label>
               <label>Категория<input value={recipeEditor.newIngredient.category} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, category: e.target.value } })} /></label>
-              <label>Цена закупки, ₽<input type="number" min={0} step={10} value={recipeEditor.newIngredient.purchasePrice} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, purchasePrice: Number(e.target.value) } })} /></label>
+              <label>Цена закупки, ₽<input type="number" min={0} step={0.01} value={recipeEditor.newIngredient.purchasePrice} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, purchasePrice: Number(e.target.value) } })} /></label>
               <label>Единица<select value={recipeEditor.newIngredient.purchaseUnit} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, purchaseUnit: e.target.value } })}><option value="kg">кг</option><option value="g">г</option><option value="liter">л</option><option value="ml">мл</option><option value="piece">шт.</option></select></label>
               <button type="button" onClick={() => setInlineIngredient(false)}>Выбрать из справочника</button>
             </>
           )}
-          <label>Количество<input type="number" min={0} step={1} value={recipeEditor.quantity ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, quantity: Number(e.target.value) })} /></label>
+          <label>Количество<input type="number" min={0} step={0.1} value={recipeEditor.quantity ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, quantity: Number(e.target.value) })} /></label>
           <label>Единица<select value={recipeEditor.unit ?? "g"} onChange={(e) => setRecipeEditor({ ...recipeEditor, unit: e.target.value })}><option value="g">г</option><option value="ml">мл</option><option value="piece">шт.</option></select></label>
-          <label>Потери в рецепте, %<input type="number" min={0} max={100} step={1} value={recipeEditor.yieldLossPercent ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, yieldLossPercent: Number(e.target.value) })} /></label>
+          <label>Потери в рецепте, %<input type="number" min={0} max={100} step={0.1} value={recipeEditor.yieldLossPercent ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, yieldLossPercent: Number(e.target.value) })} /></label>
           <label className="wide">Комментарий<textarea value={recipeEditor.comment ?? ""} onChange={(e) => setRecipeEditor({ ...recipeEditor, comment: e.target.value })} /></label>
         </Editor>
       )}
@@ -272,7 +272,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
       {packEditor && (
         <Editor title={packEditor.id ? "Редактировать упаковку SKU" : "Добавить упаковку к SKU"} onClose={() => setPackEditor(null)} onSave={savePackaging}>
           <label className="wide">Упаковка<select value={packEditor.packagingId} onChange={(e) => setPackEditor({ ...packEditor, packagingId: e.target.value })}>{packaging.map((item: any) => <option key={item.id} value={item.id}>{item.name} · {rub(item.costPerUnit)}</option>)}</select></label>
-          <label>Количество<input type="number" min={0} step={1} value={packEditor.units ?? 1} onChange={(e) => setPackEditor({ ...packEditor, units: Number(e.target.value) })} /></label>
+          <label>Количество<input type="number" min={0} step={0.1} value={packEditor.units ?? 1} onChange={(e) => setPackEditor({ ...packEditor, units: Number(e.target.value) })} /></label>
           <label className="wide">Комментарий<textarea value={packEditor.comment ?? ""} onChange={(e) => setPackEditor({ ...packEditor, comment: e.target.value })} /></label>
           {!packaging.length && <p className="muted wide">Сначала создайте упаковку на странице «Ингредиенты и упаковка».</p>}
         </Editor>

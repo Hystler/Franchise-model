@@ -3,20 +3,20 @@ export function truncateSkuName(name: string, max = 22) {
 }
 
 export const CHART_COLORS = {
-  blue: "#6EA8FE",
-  blueSoft: "#9CCBFF",
-  steel: "#8E99A8",
+  blue: "#5F8FCF",
+  blueSoft: "#8EC5FF",
+  steel: "#9BA4B2",
   silver: "#D7DCE3",
-  olive: "#72B879",
-  warning: "#D6A85C",
+  olive: "#76C893",
+  warning: "#E0B15E",
   red: "#E06A5F",
   redDark: "#7A2D26",
-  graphite: "#22262E",
-  surface: "#111317",
+  graphite: "#252B36",
+  surface: "#12161C",
   grid: "rgba(255,255,255,0.06)",
   axis: "rgba(245,247,250,0.45)",
   text: "#F5F7FA",
-  muted: "#A6ADB8"
+  muted: "#AAB2C0"
 };
 
 export const CHART_SERIES = [

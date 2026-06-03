@@ -175,9 +175,9 @@ Dashboard показывает:
 
 - график `Выручка / EBITDA / Cashflow` на 12 месяцев;
 - donut структуры расходов;
-- график Unit Economics SKU: топ SKU по EBITDA/SKU;
+- график Unit Economics по SKU: топ SKU по EBITDA/SKU;
 - график Break-even с нулевой линией;
-- preview Payback Franchise, если Franchise заполнен;
+- preview Payback франшизы, если Franchise заполнен;
 - аудит модели;
 - быстрые действия;
 - заполненность модели по ценам SKU, рецептурам, упаковке, CAPEX, OPEX, Store Model и Franchise.
@@ -366,9 +366,6 @@ XLSX генерируется в памяти и отдаётся response бе�
 - `menu_template.csv`
 - `recipes_template.csv`
 - `ingredients_template.csv`
-- `capex_template.csv`
-- `opex_template.csv`
-- `tax_settings_template.csv`
 
 Меню можно импортировать с сайта через:
 
@@ -376,7 +373,7 @@ XLSX генерируется в памяти и отдаётся response бе�
 npm run scrape
 ```
 
-Scraper — локальный script. Он пишет artifacts в `public/scrape_artifacts` и не запускается на Vercel автоматически. Для production seed используется JSON-выгрузка меню, а все пользовательские данные хранятся в PostgreSQL.
+Scraper — локальный script. Он пишет artifacts в `scrape_artifacts` вне публичной папки и не запускается на Vercel автоматически. Для production seed используются демо-данные seed, а все пользовательские данные хранятся в PostgreSQL.
 
 Импортированные SKU не теряются при повторном импорте. Demo seed обновляет свои демо-позиции по паре `category + name` и стабильным `demo-*` id для справочников и связей.
 

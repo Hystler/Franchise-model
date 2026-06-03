@@ -17,7 +17,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 import { CHART_COLORS, CHART_SERIES, chartAxisProps, chartGridProps, chartTooltipProps } from "@/lib/charts";
 import { loadModel } from "@/lib/model";
 import { num, percent, rub } from "@/lib/format";
@@ -122,8 +122,8 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
             <PercentInput name="franchiseAggregatorSharePercent" label="Доля агрегаторов, %" value={franchise.franchiseAggregatorSharePercent} />
             <PercentInput name="franchiseAcquiringRatePercent" label="Эквайринг, %" value={franchise.franchiseAcquiringRatePercent} />
             <PercentInput name="franchiseAggregatorCommissionPercent" label="Комиссия агрегатора, %" value={franchise.franchiseAggregatorCommissionPercent} />
-            <MoneyInput name="franchiseLogisticsPerOrder" label="Логистика / заказ, ₽" value={franchise.franchiseLogisticsPerOrder} step={10} />
-            <MoneyInput name="franchiseMarketingPerSku" label="Маркетинг / SKU, ₽" value={franchise.franchiseMarketingPerSku} step={10} />
+            <MoneyInput name="franchiseLogisticsPerOrder" label="Логистика / заказ, ₽" value={franchise.franchiseLogisticsPerOrder} step={1} />
+            <MoneyInput name="franchiseMarketingPerSku" label="Маркетинг / SKU, ₽" value={franchise.franchiseMarketingPerSku} step={1} />
             <PercentInput name="franchiseRevenueTaxRatePercent" label="Налог с выручки, %" value={franchise.franchiseRevenueTaxRatePercent} />
             <PercentInput name="franchiseProfitTaxRatePercent" label="Налог на прибыль, %" value={franchise.franchiseProfitTaxRatePercent} />
             <PercentInput name="franchiseVatRatePercent" label="НДС, %" value={franchise.franchiseVatRatePercent} />
@@ -480,7 +480,7 @@ function NumberInput({
 }
 
 function PercentInput({ label, name, value }: { label: string; name: string; value: string | number }) {
-  return <NumberInput label={label} name={name} value={value} min={0} max={100} step={1} />;
+  return <NumberInput label={label} name={name} value={value} min={0} max={100} step={0.1} />;
 }
 
 function MoneyInput({ label, name, value, step }: { label: string; name: string; value: string | number; step: number }) {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Edit3, Plus, Trash2, Upload } from "lucide-react";
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 import { loadModel } from "@/lib/model";
 import { percent, rub } from "@/lib/format";
 
@@ -135,7 +135,7 @@ export default function MenuPage({ economics, products, categories }: any) {
                       className="priceInput"
                       type="number"
                       min={0}
-                      step={10}
+                      step={1}
                       defaultValue={Math.round(row.salePrice)}
                       onBlur={(event) => patchPrice(row, event.currentTarget.value)}
                       aria-label={`Цена ${row.name}`}
@@ -187,7 +187,7 @@ export default function MenuPage({ economics, products, categories }: any) {
                 <label>Название<input value={editor.name} onChange={(e) => setEditor({ ...editor, name: e.target.value })} /></label>
                 <label>Категория<input list="categories" value={editor.category} onChange={(e) => setEditor({ ...editor, category: e.target.value })} /></label>
                 <datalist id="categories">{categories.map((item: string) => <option key={item} value={item} />)}</datalist>
-                <label>Цена, ₽<input type="number" min={0} step={10} value={editor.salePrice} onChange={(e) => setEditor({ ...editor, salePrice: Number(e.target.value) })} /></label>
+                <label>Цена, ₽<input type="number" min={0} step={1} value={editor.salePrice} onChange={(e) => setEditor({ ...editor, salePrice: Number(e.target.value) })} /></label>
                 <label>Источник<select value={editor.source} onChange={(e) => setEditor({ ...editor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED_MENU</option><option>ASSUMPTION</option></select></label>
                 <label className="wide">Описание<textarea value={editor.description ?? ""} onChange={(e) => setEditor({ ...editor, description: e.target.value })} /></label>
                 <label>URL изображения<input value={editor.imageUrl ?? ""} onChange={(e) => setEditor({ ...editor, imageUrl: e.target.value })} /></label>

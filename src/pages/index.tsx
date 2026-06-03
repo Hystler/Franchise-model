@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import {
   AlertTriangle,
@@ -8,9 +7,7 @@ import {
   CircleDollarSign,
   Database,
   Download,
-  FileSpreadsheet,
   FileUp,
-  LayoutDashboard,
   Layers,
   LineChart as LineChartIcon,
   Plus,
@@ -25,7 +22,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  ComposedChart,
   Legend,
   Line,
   LineChart,
@@ -37,37 +33,83 @@ import {
   XAxis,
   YAxis
 } from "recharts";
+import { Shell } from "@/components/shell";
 import { loadModel } from "@/lib/model";
 import { CHART_COLORS, CHART_SERIES, chartAxisProps, chartGridProps, chartTooltipProps, truncateSkuName } from "@/lib/charts";
 import { num, percent, rub } from "@/lib/format";
 
 export async function getServerSideProps() {
   const data = await loadModel();
+  const economics = data.economics.map((sku: any) => ({
+    productId: sku.productId,
+    name: sku.name,
+    ingredientCost: sku.ingredientCost,
+    packagingCost: sku.packagingCost,
+    contributionMarginPercent: sku.contributionMarginPercent,
+    ebitdaMarginPercent: sku.ebitdaMarginPercent,
+    ebitdaPerItem: sku.ebitdaPerItem,
+    hasRecipe: sku.hasRecipe,
+    hasPackaging: sku.hasPackaging
+  }));
+  const franchise = data.franchiseModel?.franchise ?? {};
+  const summary = {
+    monthlyRevenue: data.model.monthlyRevenue,
+    monthlyOrders: data.model.monthlyOrders,
+    grossProfit: data.model.grossProfit,
+    ebitda: data.model.ebitda,
+    ebitdaMargin: data.model.ebitdaMargin,
+    operatingCashflow: data.model.operatingCashflow,
+    initialInvestment: data.model.initialInvestment,
+    paybackMonth: data.model.paybackMonth,
+    roi: data.model.roi,
+    breakEvenOrdersPerDay: data.model.breakEvenOrdersPerDay,
+    foodCostTotal: data.model.foodCostTotal,
+    packagingTotal: data.model.packagingTotal,
+    variableCosts: data.model.variableCosts,
+    fixedCosts: data.model.fixedCosts,
+    taxPaid: data.model.taxPaid,
+    monthlyDepreciation: data.model.monthlyDepreciation
+  };
+  const completeness = [
+    { label: "Цены SKU", done: data.products.filter((sku: any) => sku.salePrice > 0).length, total: data.products.length },
+    { label: "Рецептуры", done: economics.filter((sku: any) => sku.hasRecipe).length, total: economics.length },
+    { label: "Упаковка SKU", done: economics.filter((sku: any) => sku.hasPackaging).length, total: economics.length },
+    { label: "CAPEX", done: data.capex.filter((row: any) => row.amount > 0).length, total: Math.max(data.capex.length, 1) },
+    { label: "OPEX", done: data.opex.filter((row: any) => row.amount > 0).length, total: Math.max(data.opex.length, 1) },
+    { label: "Store Model", done: [data.store.workingDaysPerMonth, data.store.avgOrdersPerDay, data.store.avgItemsPerOrder, data.store.avgCheck].filter((value: number) => value > 0).length, total: 4 },
+    { label: "Franchise", done: [
+      franchise.franchiseWorkingDaysPerMonth,
+      franchise.franchiseAvgOrdersPerDay,
+      franchise.franchiseAvgItemsPerOrder,
+      franchise.franchiseAvgCheck,
+      (franchise.franchiseRent ?? 0) + (franchise.franchisePayroll ?? 0) + (franchise.franchiseOtherFixedOpex ?? 0)
+    ].filter((value: number) => value > 0).length, total: 5 }
+  ];
+
   return {
     props: {
-      summary: data.model,
-      checks: data.checks,
-      diagnostics: data.diagnostics,
-      economics: data.economics,
-      sensitivity: data.sensitivity,
-      cashflow: data.model.cumulativeCashflow.slice(0, 24),
-      franchiseModel: data.franchiseModel,
-      products: data.products,
-      capex: data.capex,
-      opex: data.opex,
-      store: data.store
+      summary,
+      checks: data.checks.map((check: any) => ({ code: check.code, severity: check.severity, message: check.message })),
+      diagnostics: data.diagnostics.map((item: any) => ({ severity: item.severity, message: item.message })),
+      economics,
+      sensitivity: data.sensitivity.map((row: any) => ({ parameter: row.parameter, impactOnEbitda: row.impactOnEbitda })),
+      cashflow: data.model.cumulativeCashflow.slice(0, 24).map((row: any) => ({ month: row.month, cumulativeCashflow: row.cumulativeCashflow })),
+      franchisePayback: data.franchiseModel?.franchisee?.cumulativeCashflow24?.map((row: any) => ({ month: row.month, openingInvestment: row.openingInvestment, cumulativeCashflow: row.cumulativeCashflow })) ?? [],
+      activeSkuCount: data.products.filter((sku: any) => sku.isActive !== false).length,
+      missingRecipeCount: economics.filter((sku: any) => !sku.hasRecipe).length,
+      negativeEbitdaCount: economics.filter((sku: any) => sku.ebitdaPerItem < 0).length,
+      completeness
     }
   };
 }
 
-export default function Dashboard({ summary, checks, diagnostics, economics, sensitivity, cashflow, franchiseModel, products, capex, opex, store }: any) {
+export default function Dashboard({ summary, checks, diagnostics, economics, sensitivity, cashflow, franchisePayback, activeSkuCount, missingRecipeCount, negativeEbitdaCount, completeness }: any) {
   const withCosts = economics.filter((sku: any) => sku.ingredientCost > 0 || sku.packagingCost > 0);
   const top = [...withCosts].sort((a, b) => b.ebitdaPerItem - a.ebitdaPerItem).slice(0, 10);
   const weak = [...withCosts].sort((a, b) => a.contributionMarginPercent - b.contributionMarginPercent).slice(0, 5);
-  const activeSkuCount = products.filter((sku: any) => sku.isActive !== false).length;
-  const missingRecipeCount = economics.filter((sku: any) => !sku.hasRecipe).length;
-  const negativeEbitdaCount = economics.filter((sku: any) => sku.ebitdaPerItem < 0).length;
   const hasInvestmentPaybackBase = summary.initialInvestment > 0 && summary.monthlyRevenue > 0 && summary.operatingCashflow > 0;
+  const hasPayback = hasInvestmentPaybackBase && summary.paybackMonth;
+  const hasRoi = hasInvestmentPaybackBase && summary.roi != null;
   const forecast = Array.from({ length: 12 }, (_, index) => ({
     month: index + 1,
     revenue: summary.monthlyRevenue,
@@ -101,23 +143,8 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
     .sort((a: any, b: any) => Math.abs(b.impact) - Math.abs(a.impact))
     .slice(0, 8);
   const tornadoHeight = Math.max(320, tornado.length * 42);
-  const franchisePayback = franchiseModel?.franchisee?.cumulativeCashflow24 ?? [];
   const hasFranchisePreview = franchisePayback.some((row: any) => row.openingInvestment > 0 || row.cumulativeCashflow !== 0);
-  const completeness = [
-    { label: "Цены SKU", done: products.filter((sku: any) => sku.salePrice > 0).length, total: products.length },
-    { label: "Рецептуры", done: economics.filter((sku: any) => sku.hasRecipe).length, total: economics.length },
-    { label: "Упаковка SKU", done: economics.filter((sku: any) => sku.hasPackaging).length, total: economics.length },
-    { label: "CAPEX", done: capex.filter((row: any) => row.amount > 0).length, total: Math.max(capex.length, 1) },
-    { label: "OPEX", done: opex.filter((row: any) => row.amount > 0).length, total: Math.max(opex.length, 1) },
-    { label: "Store Model", done: [store.workingDaysPerMonth, store.avgOrdersPerDay, store.avgItemsPerOrder, store.avgCheck].filter((value: number) => value > 0).length, total: 4 },
-    { label: "Franchise", done: [
-      franchiseModel.franchise.franchiseWorkingDaysPerMonth,
-      franchiseModel.franchise.franchiseAvgOrdersPerDay,
-      franchiseModel.franchise.franchiseAvgItemsPerOrder,
-      franchiseModel.franchise.franchiseAvgCheck,
-      franchiseModel.franchise.franchiseRent + franchiseModel.franchise.franchisePayroll + franchiseModel.franchise.franchiseOtherFixedOpex
-    ].filter((value: number) => value > 0).length, total: 5 }
-  ];
+  const cashflowLineColor = forecast.some((row) => row.cashflow < 0) ? CHART_COLORS.red : CHART_COLORS.warning;
 
   return (
     <Shell>
@@ -138,18 +165,18 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
       </div>
 
       <div className="metrics">
-        <Metric title="Выручка / мес" value={rub(summary.monthlyRevenue)} note="Текущая Store Model" icon={<CircleDollarSign size={18} />} />
+        <Metric title="Выручка / мес" value={rub(summary.monthlyRevenue)} note="Текущая модель точки" icon={<CircleDollarSign size={18} />} />
         <Metric title="Валовая прибыль" value={rub(summary.grossProfit)} note="После себестоимости и упаковки" icon={<TrendingUp size={18} />} />
         <Metric title="EBITDA" value={rub(summary.ebitda)} note="До налогов и cashflow-корректировок" icon={<BarChart3 size={18} />} />
         <Metric title="Маржа EBITDA" value={percent(summary.ebitdaMargin)} note="EBITDA / выручка" icon={<LineChartIcon size={18} />} />
         <Metric title="Операционный cashflow" value={rub(summary.operatingCashflow)} note="После налогов и выплат" icon={<WalletCards size={18} />} />
         <Metric title="Инвестиции на открытие" value={rub(summary.initialInvestment)} note="CAPEX до старта" icon={<ReceiptText size={18} />} />
-        <Metric title="Payback" value={hasInvestmentPaybackBase && summary.paybackMonth ? `${summary.paybackMonth} мес.` : "n/a"} note="Не считается при пустой модели" icon={<Calculator size={18} />} />
+        <Metric title="Payback" value={hasPayback ? `${summary.paybackMonth} мес.` : "n/a"} note={hasPayback ? "На базе текущих CAPEX и cashflow" : "Не считается без CAPEX и cashflow"} icon={<Calculator size={18} />} />
         <Metric title="Break-even / день" value={summary.monthlyRevenue > 0 && summary.breakEvenOrdersPerDay != null ? `${Math.ceil(summary.breakEvenOrdersPerDay)} заказов` : "n/a"} note="Заказы для выхода в ноль" icon={<ShieldCheck size={18} />} />
         <Metric title="Активные SKU" value={num(activeSkuCount, 0)} note="Включены в меню" icon={<Table2 size={18} />} />
         <Metric title="SKU без рецептуры" value={num(missingRecipeCount, 0)} note="Нужно заполнить состав" icon={<Layers size={18} />} />
         <Metric title="SKU с отрицательной EBITDA" value={num(negativeEbitdaCount, 0)} note="Требуют проверки цены или затрат" icon={<AlertTriangle size={18} />} />
-        <Metric title="ROI" value={hasInvestmentPaybackBase && summary.roi != null ? percent(summary.roi) : "n/a"} note="Не считается без CAPEX и cashflow" icon={<Database size={18} />} />
+        <Metric title="ROI" value={hasRoi ? percent(summary.roi) : "n/a"} note={hasRoi ? "Годовой ROI по текущим допущениям" : "Не считается без CAPEX и cashflow"} icon={<Database size={18} />} />
       </div>
 
       <section className="band quickActions">
@@ -169,24 +196,39 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
         </div>
       </section>
 
-      <section className="band">
+      <section className="band dashboardFinanceChart">
         <div className="sectionHead">
           <h2>Выручка / EBITDA / Cashflow</h2>
-          <span>12 месяцев на базе текущих допущений</span>
+          <span>Выручка показана отдельно от операционных линий, чтобы масштаб не искажал EBITDA и Cashflow.</span>
         </div>
-        <div className="chart">
-          <ResponsiveContainer width="100%" height={260}>
-            <ComposedChart data={forecast} margin={{ top: 16, right: 24, bottom: 8, left: 12 }}>
-              <CartesianGrid {...chartGridProps} />
-              <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `${value}`} />
-              <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
-              <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} />
-              <Legend />
-              <Bar dataKey="revenue" fill={CHART_COLORS.blueSoft} name="Выручка" radius={[8, 8, 0, 0]} />
-              <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.olive} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft, stroke: CHART_COLORS.surface }} name="EBITDA" />
-              <Line type="monotone" dataKey="cashflow" stroke={CHART_COLORS.warning} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft, stroke: CHART_COLORS.surface }} name="Cashflow" />
-            </ComposedChart>
-          </ResponsiveContainer>
+        <div className="dashboardChartStack">
+          <div className="chartPane">
+            <div className="chartPaneTitle">Выручка <span>12 месяцев</span></div>
+            <ResponsiveContainer width="100%" height={190}>
+              <LineChart data={forecast} margin={{ top: 10, right: 20, bottom: 4, left: 8 }}>
+                <CartesianGrid {...chartGridProps} />
+                <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `M${value}`} />
+                <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={78} />
+                <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
+                <Line type="monotone" dataKey="revenue" name="Выручка" stroke={CHART_COLORS.blueSoft} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft, stroke: CHART_COLORS.surface, strokeWidth: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="chartPane">
+            <div className="chartPaneTitle">EBITDA и Cashflow <span>операционные линии</span></div>
+            <ResponsiveContainer width="100%" height={205}>
+              <LineChart data={forecast} margin={{ top: 10, right: 20, bottom: 4, left: 8 }}>
+                <CartesianGrid {...chartGridProps} />
+                <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `M${value}`} />
+                <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={78} />
+                <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
+                <Legend verticalAlign="top" height={24} />
+                <ReferenceLine y={0} stroke={CHART_COLORS.grid} strokeDasharray="4 5" />
+                <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.olive} strokeWidth={2.8} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.olive, stroke: CHART_COLORS.surface, strokeWidth: 2 }} name="EBITDA" />
+                <Line type="monotone" dataKey="cashflow" stroke={cashflowLineColor} strokeWidth={2.8} dot={false} activeDot={{ r: 5, fill: cashflowLineColor, stroke: CHART_COLORS.surface, strokeWidth: 2 }} name="Cashflow" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </section>
 
@@ -228,7 +270,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
 
       <div className="twoCol">
         <section className="band">
-          <h2>Unit Economics SKU</h2>
+          <h2>Unit Economics по SKU</h2>
           {!hasSkuCosts ? (
             <div className="emptyState">Заполните рецептуры и закупочные цены, чтобы увидеть рейтинг маржинальности.</div>
           ) : (
@@ -250,7 +292,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           )}
         </section>
         <section className="band">
-          <h2>Sensitivity: влияние на EBITDA</h2>
+          <h2>Чувствительность модели</h2>
           <div className="chart" style={{ height: tornadoHeight }}>
             <ResponsiveContainer width="100%" height={tornadoHeight}>
               <BarChart data={tornado} layout="vertical" margin={{ left: 18, right: 18 }}>
@@ -269,7 +311,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
 
       <div className="twoCol">
         <section className="band">
-          <h2>Payback Franchise</h2>
+          <h2>Payback франшизы</h2>
           {hasFranchisePreview ? (
             <div className="chart">
               <ResponsiveContainer width="100%" height={260}>
@@ -289,7 +331,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
         <section className="band">
           <h2>Заполненность модели</h2>
           <div className="progressGrid">
-            {completeness.map((item) => <ProgressCard key={item.label} {...item} />)}
+            {completeness.map((item: { label: string; done: number; total: number }) => <ProgressCard key={item.label} {...item} />)}
           </div>
         </section>
       </div>
@@ -332,67 +374,6 @@ function Diagnostics({ diagnostics }: { diagnostics: any[] }) {
     </section>
   );
 }
-
-export function Shell({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const current = router.pathname;
-  const isData = current === "/menu" || current === "/ingredients" || current.startsWith("/sku");
-  const isStore = current === "/store" || current === "/store-model" || current === "/capex" || current === "/opex" || current === "/sensitivity";
-  const navItems = [
-    { href: "/", label: "Dashboard", icon: <LayoutDashboard size={16} />, active: current === "/" },
-    { href: "/menu", label: "Данные", icon: <Database size={16} />, active: isData },
-    { href: "/store-model", label: "Store Model", icon: <Calculator size={16} />, active: isStore },
-    { href: "/forecast", label: "Прогноз", icon: <TrendingUp size={16} />, active: current === "/forecast" },
-    { href: "/franchise", label: "Franchise", icon: <FileSpreadsheet size={16} />, active: current === "/franchise" },
-    { href: "/audit", label: "Аудит", icon: <ShieldCheck size={16} />, active: current === "/checks" || current === "/audit" }
-  ];
-
-  return (
-    <div>
-      <nav className="nav">
-        <Link href="/" className="brand"><LayoutDashboard size={18} /> Franchise Model</Link>
-        {navItems.map((item) => (
-          <Link key={item.href} href={item.href} className={item.active ? "active" : ""}>{item.icon}{item.label}</Link>
-        ))}
-        <span className="navSpacer" />
-        <Link href="/import" className="navAction"><FileUp size={16} /> Импорт</Link>
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a href="/api/export/full" className="navAction primaryNavAction"><Download size={16} /> Экспорт XLSX</a>
-      </nav>
-      {isData && <DataSubnav />}
-      {isStore && <StoreSubnav />}
-      <main className="main">{children}</main>
-    </div>
-  );
-}
-
-function DataSubnav() {
-  return (
-    <div className="subnav">
-      <Link href="/menu"><Table2 size={15} /> SKU</Link>
-      <Link href="/ingredients"><Layers size={15} /> Ингредиенты</Link>
-      <Link href="/menu">Рецептуры</Link>
-      <Link href="/ingredients">Упаковка</Link>
-    </div>
-  );
-}
-
-function StoreSubnav() {
-  return (
-    <div className="subnav">
-      <Link href="/store-model#overview">Overview</Link>
-      <Link href="/store-model#inputs">Inputs</Link>
-      <Link href="/store-model#pnl">P&L</Link>
-      <Link href="/store-model#cashflow">Cashflow</Link>
-      <Link href="/store-model#capex">CAPEX</Link>
-      <Link href="/store-model#opex">OPEX</Link>
-      <Link href="/store-model#sensitivity">Sensitivity</Link>
-      <Link href="/store-model#break-even">Break-even</Link>
-      <Link href="/store-model#checks">Checks</Link>
-    </div>
-  );
-}
-
 
 function Metric({ title, value, note, icon }: { title: string; value: string; note?: string; icon?: ReactNode }) {
   return (

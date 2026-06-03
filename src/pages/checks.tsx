@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Shell } from "@/pages/index";
+import { Shell } from "@/components/shell";
 import { loadModel } from "@/lib/model";
 
 const filters = [
