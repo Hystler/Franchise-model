@@ -3,31 +3,31 @@ export function truncateSkuName(name: string, max = 22) {
 }
 
 export const CHART_COLORS = {
-  gold: "#D6AE68",
-  goldSoft: "#F1D08A",
-  copper: "#C0783E",
-  copperDark: "#9A5F32",
-  olive: "#8DA66A",
-  oliveDark: "#6F8F4E",
-  red: "#B84A3A",
+  blue: "#6EA8FE",
+  blueSoft: "#9CCBFF",
+  steel: "#8E99A8",
+  silver: "#D7DCE3",
+  olive: "#72B879",
+  warning: "#D6A85C",
+  red: "#E06A5F",
   redDark: "#7A2D26",
-  beige: "#B8A98E",
-  surface: "#181510",
+  graphite: "#22262E",
+  surface: "#111317",
   grid: "rgba(255,255,255,0.06)",
-  axis: "rgba(244,232,208,0.35)",
-  text: "#F4E8D0",
-  muted: "#B8A98E"
+  axis: "rgba(245,247,250,0.45)",
+  text: "#F5F7FA",
+  muted: "#A6ADB8"
 };
 
 export const CHART_SERIES = [
-  CHART_COLORS.gold,
-  CHART_COLORS.copper,
+  CHART_COLORS.blueSoft,
+  CHART_COLORS.steel,
   CHART_COLORS.olive,
-  CHART_COLORS.red,
-  CHART_COLORS.goldSoft,
-  CHART_COLORS.copperDark,
-  CHART_COLORS.oliveDark,
-  CHART_COLORS.beige
+  CHART_COLORS.warning,
+  CHART_COLORS.silver,
+  CHART_COLORS.blue,
+  CHART_COLORS.graphite,
+  CHART_COLORS.red
 ];
 
 export const chartGridProps = {
@@ -44,12 +44,12 @@ export const chartAxisProps = {
 export const chartTooltipProps = {
   contentStyle: {
     background: CHART_COLORS.surface,
-    border: "1px solid rgba(214,174,104,0.35)",
+    border: "1px solid rgba(156,203,255,0.25)",
     borderRadius: 14,
     color: CHART_COLORS.text,
     boxShadow: "0 24px 70px rgba(0,0,0,0.48)"
   },
-  labelStyle: { color: CHART_COLORS.goldSoft },
+  labelStyle: { color: CHART_COLORS.blueSoft },
   itemStyle: { color: CHART_COLORS.text }
 };
 

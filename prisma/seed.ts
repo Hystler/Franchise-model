@@ -308,23 +308,23 @@ const products: ProductSeed[] = [
 ];
 
 const opexItems = [
-  { id: "demo-opex-rent", category: "Rent / аренда", amount: 175000, behavior: "FIXED", driver: "FIXED", comment: "Demo fixed OPEX for portfolio model." },
-  { id: "demo-opex-payroll", category: "Payroll / ФОТ", amount: 360000, behavior: "FIXED", driver: "FIXED", comment: "Demo staff payroll assumption." },
-  { id: "demo-opex-utilities", category: "Utilities / коммунальные", amount: 55000, behavior: "FIXED", driver: "FIXED", comment: "Demo utilities and kitchen services." },
-  { id: "demo-opex-software", category: "Software / POS / IT", amount: 28000, behavior: "FIXED", driver: "FIXED", comment: "Demo POS, CRM and subscriptions." },
-  { id: "demo-opex-accounting", category: "Accounting / legal", amount: 30000, behavior: "FIXED", driver: "FIXED", comment: "Demo accounting and legal support." },
-  { id: "demo-opex-repairs", category: "Repairs / maintenance", amount: 25000, behavior: "FIXED", driver: "FIXED", comment: "Demo maintenance reserve." },
-  { id: "demo-opex-local-marketing", category: "Local marketing fixed", amount: 60000, behavior: "FIXED", driver: "FIXED", comment: "Demo fixed local marketing budget." },
-  { id: "demo-opex-other", category: "Other fixed OPEX", amount: 45000, behavior: "FIXED", driver: "FIXED", comment: "Demo miscellaneous fixed cost." }
+  { id: "demo-opex-rent", category: "Аренда", amount: 175000, behavior: "FIXED", driver: "FIXED", comment: "Демо: постоянные расходы для портфолио-модели." },
+  { id: "demo-opex-payroll", category: "ФОТ", amount: 360000, behavior: "FIXED", driver: "FIXED", comment: "Демо: допущение по ФОТ команды." },
+  { id: "demo-opex-utilities", category: "Коммунальные и сервисы", amount: 55000, behavior: "FIXED", driver: "FIXED", comment: "Демо: коммунальные и кухонные сервисы." },
+  { id: "demo-opex-software", category: "Софт, POS и IT", amount: 28000, behavior: "FIXED", driver: "FIXED", comment: "Демо: POS, CRM и подписки." },
+  { id: "demo-opex-accounting", category: "Бухгалтерия и юр. поддержка", amount: 30000, behavior: "FIXED", driver: "FIXED", comment: "Демо: бухгалтерия и юридическая поддержка." },
+  { id: "demo-opex-repairs", category: "Ремонт и обслуживание", amount: 25000, behavior: "FIXED", driver: "FIXED", comment: "Демо: резерв на ремонт и обслуживание." },
+  { id: "demo-opex-local-marketing", category: "Локальный маркетинг", amount: 60000, behavior: "FIXED", driver: "FIXED", comment: "Демо: фиксированный бюджет локального маркетинга." },
+  { id: "demo-opex-other", category: "Прочий OPEX", amount: 45000, behavior: "FIXED", driver: "FIXED", comment: "Демо: прочие постоянные расходы." }
 ] as const;
 
 const capexItems = [
-  { id: "demo-capex-kitchen-equipment", category: "Kitchen equipment", amount: 1250000, usefulLifeMonths: 60, supplierComment: "Demo fryers, grills, refrigeration.", required: true, paidBeforeOpening: true },
-  { id: "demo-capex-renovation", category: "Renovation and fit-out", amount: 680000, usefulLifeMonths: 60, supplierComment: "Demo interior and engineering works.", required: true, paidBeforeOpening: true },
-  { id: "demo-capex-furniture", category: "Furniture and counter", amount: 320000, usefulLifeMonths: 48, supplierComment: "Demo service counter and small seating area.", required: true, paidBeforeOpening: true },
-  { id: "demo-capex-signage", category: "Signage and menu boards", amount: 180000, usefulLifeMonths: 36, supplierComment: "Demo exterior signage and menu boards.", required: true, paidBeforeOpening: true },
-  { id: "demo-capex-pos-it", category: "POS and IT", amount: 140000, usefulLifeMonths: 36, supplierComment: "Demo POS terminals, tablets and network.", required: true, paidBeforeOpening: true },
-  { id: "demo-capex-opening-stock", category: "Opening stock and smallware", amount: 220000, usefulLifeMonths: 12, supplierComment: "Demo opening inventory and small equipment.", required: true, paidBeforeOpening: true }
+  { id: "demo-capex-kitchen-equipment", category: "Кухонное оборудование", amount: 1250000, usefulLifeMonths: 60, supplierComment: "Демо: фритюрницы, гриль и холодильное оборудование.", required: true, paidBeforeOpening: true },
+  { id: "demo-capex-renovation", category: "Ремонт и инженерия", amount: 680000, usefulLifeMonths: 60, supplierComment: "Демо: интерьер, отделка и инженерные работы.", required: true, paidBeforeOpening: true },
+  { id: "demo-capex-furniture", category: "Мебель и стойка", amount: 320000, usefulLifeMonths: 48, supplierComment: "Демо: стойка выдачи и небольшая посадочная зона.", required: true, paidBeforeOpening: true },
+  { id: "demo-capex-signage", category: "Вывеска и меню-борды", amount: 180000, usefulLifeMonths: 36, supplierComment: "Демо: внешняя вывеска и меню-борды.", required: true, paidBeforeOpening: true },
+  { id: "demo-capex-pos-it", category: "POS и IT", amount: 140000, usefulLifeMonths: 36, supplierComment: "Демо: POS-терминалы, планшеты и сеть.", required: true, paidBeforeOpening: true },
+  { id: "demo-capex-opening-stock", category: "Стартовый склад и мелкий инвентарь", amount: 220000, usefulLifeMonths: 12, supplierComment: "Демо: стартовый склад и мелкий инвентарь.", required: true, paidBeforeOpening: true }
 ];
 
 const slug = (value: string) =>

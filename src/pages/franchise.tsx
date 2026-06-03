@@ -71,14 +71,14 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
         <Metric title="Инвестиции на открытие" value={rub(franchisee.openingInvestment)} />
         <Metric title="Выручка M1" value={rub(franchisee.revenueMonth1)} />
         <Metric title="Выручка M12" value={rub(franchisee.revenueMonth12)} />
-        <Metric title="EBITDA после fees M12" value={rub(franchisee.ebitdaAfterFeesMonth12)} tone={franchisee.ebitdaAfterFeesMonth12 < 0 ? "negative" : "positive"} />
+        <Metric title="EBITDA после платежей M12" value={rub(franchisee.ebitdaAfterFeesMonth12)} tone={franchisee.ebitdaAfterFeesMonth12 < 0 ? "negative" : "positive"} />
         <Metric title="Маржа EBITDA M12" value={percent(franchisee.ebitdaMarginAfterFeesMonth12)} tone={franchisee.ebitdaMarginAfterFeesMonth12 < 0.1 ? "negative" : "positive"} />
-        <Metric title="Net cashflow M12" value={rub(franchisee.netCashflowMonth12)} tone={franchisee.netCashflowMonth12 < 0 ? "negative" : "positive"} />
+        <Metric title="Операционный cashflow M12" value={rub(franchisee.netCashflowMonth12)} tone={franchisee.netCashflowMonth12 < 0 ? "negative" : "positive"} />
         <Metric title="Payback" value={franchisee.openingInvestment > 0 && franchisee.netCashflowMonth12 > 0 && franchisee.paybackMonth != null ? `${franchisee.paybackMonth} мес.` : "n/a"} />
         <Metric title="Годовой ROI" value={franchisee.openingInvestment > 0 && franchisee.annualROI != null ? percent(franchisee.annualROI) : "n/a"} tone={franchisee.annualROI != null && franchisee.annualROI < 0.3 ? "negative" : "positive"} />
       </div>
 
-      <nav className="segmented wrap sectionNav" aria-label="Franchise sections">
+      <nav className="segmented wrap sectionNav" aria-label="Разделы Franchise">
         <a href="#inputs">Вводные</a>
         <a href="#charts">Графики</a>
         <a href="#pnl">P&L</a>
@@ -94,20 +94,20 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
           <span>Проценты вводятся как 6 = 6%, шаг стрелок равен 1</span>
         </div>
         <form className="franchiseInputStack" method="post" action="/api/franchise">
-          <InputSection title="Платежи Franchise">
+          <InputSection title="Платежи франшизы">
             <MoneyInput name="lumpSumFee" label="Паушальный взнос, ₽" value={franchise.lumpSumFee} step={10000} />
-            <label>Тип royalty
+            <label>Тип роялти
               <select name="royaltyType" defaultValue={franchise.royaltyType}>
                 <option value="percent_of_revenue">Процент от выручки</option>
                 <option value="fixed_monthly">Фиксированный / мес</option>
                 <option value="hybrid">Гибрид</option>
               </select>
             </label>
-            <PercentInput name="royaltyRate" label="Ставка royalty, %" value={franchise.royaltyRate} />
-            <MoneyInput name="fixedMonthlyRoyalty" label="Фиксированный royalty, ₽ / мес" value={franchise.fixedMonthlyRoyalty} step={1000} />
+            <PercentInput name="royaltyRate" label="Ставка роялти, %" value={franchise.royaltyRate} />
+            <MoneyInput name="fixedMonthlyRoyalty" label="Фиксированный роялти, ₽ / мес" value={franchise.fixedMonthlyRoyalty} step={1000} />
             <PercentInput name="marketingFeeRate" label="Маркетинговый сбор, %" value={franchise.marketingFeeRate} />
-            <PercentInput name="supplyChainMarkup" label="Наценка supply-chain, %" value={franchise.supplyChainMarkup} />
-            <MoneyInput name="monthlyFixedFees" label="Прочие ежемесячные fees, ₽ / мес" value={franchise.monthlyFixedFees} step={1000} />
+            <PercentInput name="supplyChainMarkup" label="Наценка цепочки поставок, %" value={franchise.supplyChainMarkup} />
+            <MoneyInput name="monthlyFixedFees" label="Прочие ежемесячные платежи, ₽ / мес" value={franchise.monthlyFixedFees} step={1000} />
             <MoneyInput name="monthlySupportCostPerFranchisee" label="Поддержка / франчайзи, ₽ / мес" value={franchise.monthlySupportCostPerFranchisee} step={1000} />
             <MoneyInput name="franchisorFixedTeamCosts" label="Команда франчайзера, ₽ / мес" value={franchise.franchisorFixedTeamCosts} step={1000} />
             <NumberInput name="numberOfFranchisees" label="Количество франчайзи" value={franchise.numberOfFranchisees} min={1} step={1} />
@@ -160,14 +160,14 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
                 <option value="flat">Ровный</option>
                 <option value="growth">Рост</option>
                 <option value="decline">Снижение</option>
-                <option value="ramp_up">Ramp-up</option>
+                <option value="ramp_up">Разгон</option>
                 <option value="custom">Кастомный</option>
               </select>
             </label>
             <PercentInput name="monthlyGrowthRatePercent" label="Рост / мес, %" value={franchise.monthlyGrowthRatePercent} />
             <PercentInput name="monthlyDeclineRatePercent" label="Снижение / мес, %" value={franchise.monthlyDeclineRatePercent} />
-            <NumberInput name="rampUpMonths" label="Ramp-up, мес" value={franchise.rampUpMonths} min={1} max={60} step={1} />
-            <PercentInput name="rampUpStartPercent" label="Старт ramp-up, %" value={franchise.rampUpStartPercent} />
+            <NumberInput name="rampUpMonths" label="Разгон, мес" value={franchise.rampUpMonths} min={1} max={60} step={1} />
+            <PercentInput name="rampUpStartPercent" label="Старт разгона, %" value={franchise.rampUpStartPercent} />
             <label className="checkLine"><input type="checkbox" name="seasonalityEnabled" defaultChecked={franchise.seasonalityEnabled} /> Учитывать сезонность</label>
           </InputSection>
 
@@ -193,13 +193,13 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
                   <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
                   <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
                   <Legend />
-                  <Line type="monotone" dataKey="revenue" name="Выручка" stroke={CHART_COLORS.gold} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.goldSoft }} />
+                  <Line type="monotone" dataKey="revenue" name="Выручка" stroke={CHART_COLORS.blueSoft} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : <EmptyState text="Заполните Store Model франчайзи, чтобы увидеть тренд выручки." />}
           </ChartCard>
 
-          <ChartCard title="Выручка / EBITDA / Net cashflow">
+          <ChartCard title="Выручка / EBITDA / операционный cashflow">
             {hasRevenueForecast ? (
               <ResponsiveContainer width="100%" height={chartHeight}>
                 <ComposedChart data={forecast} margin={{ top: 16, right: 24, bottom: 8, left: 12 }}>
@@ -208,9 +208,9 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
                   <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
                   <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
                   <Legend />
-                  <Bar dataKey="revenue" name="Выручка" fill={CHART_COLORS.gold} radius={[8, 8, 0, 0]} />
-                  <Line type="monotone" dataKey="ebitdaAfterFees" name="EBITDA после fees" stroke={CHART_COLORS.olive} strokeWidth={3} dot={false} />
-                  <Line type="monotone" dataKey="netOperatingCashflow" name="Net cashflow" stroke={CHART_COLORS.copper} strokeWidth={3} dot={false} />
+                  <Bar dataKey="revenue" name="Выручка" fill={CHART_COLORS.blueSoft} radius={[8, 8, 0, 0]} />
+                  <Line type="monotone" dataKey="ebitdaAfterFees" name="EBITDA после платежей" stroke={CHART_COLORS.olive} strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="netOperatingCashflow" name="Операционный cashflow" stroke={CHART_COLORS.warning} strokeWidth={3} dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             ) : <EmptyState text="Нет данных для графика EBITDA и cashflow." />}
@@ -227,11 +227,11 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
                   <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
                   <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
                   <ReferenceLine y={0} stroke={CHART_COLORS.grid} strokeDasharray="4 4" />
-                  {paybackPoint && <ReferenceDot x={paybackPoint.month} y={paybackPoint.cumulativeCashflow} r={6} fill={CHART_COLORS.goldSoft} stroke={CHART_COLORS.surface} />}
-                  <Line type="monotone" dataKey="cumulativeCashflow" name="Накопленный cashflow" stroke={CHART_COLORS.gold} strokeWidth={3} dot={false} />
+                  {paybackPoint && <ReferenceDot x={paybackPoint.month} y={paybackPoint.cumulativeCashflow} r={6} fill={CHART_COLORS.blueSoft} stroke={CHART_COLORS.surface} />}
+                  <Line type="monotone" dataKey="cumulativeCashflow" name="Накопленный cashflow" stroke={CHART_COLORS.blueSoft} strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
-            ) : <EmptyState text="Заполните инвестиции на открытие и cashflow assumptions." />}
+            ) : <EmptyState text="Заполните инвестиции на открытие и допущения cashflow." />}
           </ChartCard>
 
           <ChartCard title="Маржинальность">
@@ -264,10 +264,10 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <EmptyState text="Заполните royalty, маркетинговый сбор или ежемесячные fees." />}
+            ) : <EmptyState text="Заполните роялти, маркетинговый сбор или ежемесячные платежи." />}
           </ChartCard>
 
-          <ChartCard title="Sensitivity Franchise">
+          <ChartCard title="Sensitivity франшизы">
             {sensitivityRows.length ? (
               <ResponsiveContainer width="100%" height={sensitivityHeight}>
                 <BarChart data={sensitivityRows} layout="vertical" margin={{ top: 16, right: 24, bottom: 8, left: 28 }}>
@@ -330,12 +330,12 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
                 <th>Месяц</th>
                 <th>Выручка</th>
                 <th>Заказы</th>
-                <th>COGS</th>
+                <th>Себестоимость</th>
                 <th>Переменные</th>
                 <th>Постоянные</th>
-                <th>EBITDA после fees</th>
+                <th>EBITDA после платежей</th>
                 <th>Налоги</th>
-                <th>Net cashflow</th>
+                <th>Операционный cashflow</th>
                 <th>Накоплено</th>
               </tr>
             </thead>
@@ -375,10 +375,10 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
         <div className="tableScroll">
           <table>
             <tbody>
-              <SimpleRow label="Royalty" value={rub(franchisor.royalty)} />
+              <SimpleRow label="Роялти" value={rub(franchisor.royalty)} />
               <SimpleRow label="Маркетинговый сбор" value={rub(franchisor.marketingFee)} />
-              <SimpleRow label="Выручка от supply-chain markup" value={rub(franchisor.supplyChainMarkupRevenue)} />
-              <SimpleRow label="Ежемесячные fixed fees" value={rub(franchisor.monthlyFixedFees)} />
+              <SimpleRow label="Выручка от наценки цепочки поставок" value={rub(franchisor.supplyChainMarkupRevenue)} />
+              <SimpleRow label="Ежемесячные фиксированные платежи" value={rub(franchisor.monthlyFixedFees)} />
               <SimpleRow label="Поддержка / франчайзи" value={rub(-franchisor.supportCostPerFranchisee)} />
               <SimpleRow label="Распределённые расходы команды" value={rub(-franchisor.allocatedFixedTeamCosts)} />
               <SimpleRow label="EBITDA франчайзера" value={rub(franchisor.ebitda)} />
@@ -390,16 +390,16 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
       <section className="band" id="scenarios">
         <div className="sectionHead">
           <h2>Сценарии</h2>
-          <span>Downside / Base / Upside используют независимые вводные Franchise</span>
+          <span>Нижний, базовый и верхний сценарии используют независимые вводные Franchise</span>
         </div>
         <div className="tableScroll">
           <table className="financeTable">
             <thead>
               <tr>
                 <th>Метрика</th>
-                <th>Downside</th>
-                <th>Base</th>
-                <th>Upside</th>
+                <th>Нижний</th>
+                <th>База</th>
+                <th>Верхний</th>
               </tr>
             </thead>
             <tbody>
@@ -432,7 +432,7 @@ export default function FranchisePage({ franchise, franchiseModel }: any) {
             <h3>Топ-причины</h3>
             {franchiseModel.breakers.length ? franchiseModel.breakers.map((item: string) => (
               <div className="check warning" key={item}><AlertTriangle size={16} /> {item}</div>
-            )) : <div className="check info">Явных слабых мест в franchise model сейчас нет.</div>}
+            )) : <div className="check info">Явных слабых мест в модели Franchise сейчас нет.</div>}
           </div>
           <div className="checks">
             <h3>Аудит Franchise</h3>
@@ -546,34 +546,34 @@ function financeLabel(label: string) {
     "avg check": "Средний чек",
     "food cost": "Себестоимость",
     rent: "Аренда",
-    royalty: "Royalty",
+    royalty: "Роялти",
     Revenue: "Выручка",
     "Food cost": "Себестоимость",
     Packaging: "Упаковка",
     "Gross profit": "Валовая прибыль",
     "Gross margin": "Валовая маржа",
     "Gross margin, %": "Валовая маржа, %",
-    "Contribution profit": "Contribution прибыль",
-    "Contribution margin": "Contribution маржа",
-    "Contribution margin, %": "Contribution маржа, %",
+    "Contribution profit": "Маржинальная прибыль",
+    "Contribution margin": "Маржа вклада",
+    "Contribution margin, %": "Маржа вклада, %",
     "Variable costs": "Переменные расходы",
     "Fixed costs": "Постоянные расходы",
     "Franchise OPEX": "OPEX Franchise",
-    "EBITDA before fees": "EBITDA до fees",
-    "EBITDA before franchise fees": "EBITDA до Franchise fees",
-    "EBITDA margin before fees, %": "Маржа EBITDA до fees, %",
-    "EBITDA after fees": "EBITDA после fees",
-    "EBITDA after franchise fees": "EBITDA после Franchise fees",
-    "EBITDA margin after fees": "Маржа EBITDA после fees",
-    "EBITDA margin after fees, %": "Маржа EBITDA после fees, %",
+    "EBITDA before fees": "EBITDA до платежей",
+    "EBITDA before franchise fees": "EBITDA до платежей франшизы",
+    "EBITDA margin before fees, %": "Маржа EBITDA до платежей, %",
+    "EBITDA after fees": "EBITDA после платежей",
+    "EBITDA after franchise fees": "EBITDA после платежей франшизы",
+    "EBITDA margin after fees": "Маржа EBITDA после платежей",
+    "EBITDA margin after fees, %": "Маржа EBITDA после платежей, %",
     Taxes: "Налоги",
-    "Net cashflow": "Net cashflow",
+    "Net cashflow": "Операционный cashflow",
     "Net operating cashflow": "Операционный cashflow",
     "Net cashflow margin, %": "Маржа cashflow, %",
-    Royalty: "Royalty",
+    Royalty: "Роялти",
     "Marketing fee": "Маркетинговый сбор",
-    "Supply-chain markup": "Supply-chain markup",
-    "Monthly fixed fees": "Ежемесячные fixed fees",
+    "Supply-chain markup": "Наценка цепочки поставок",
+    "Monthly fixed fees": "Ежемесячные фиксированные платежи",
     "Lump sum": "Паушальный взнос",
     Training: "Обучение",
     "Opening support": "Поддержка открытия",

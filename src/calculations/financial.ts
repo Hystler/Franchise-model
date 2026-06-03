@@ -379,7 +379,7 @@ export function runChecks(
   if (model.variableCosts > model.monthlyRevenue) checks.push({ severity: "critical", code: "VARIABLE_COSTS_OVER_REVENUE", message: "Переменные расходы выше выручки", category: "Store Model" });
   if (products.length && model.foodCostTotal === 0) checks.push({ severity: "warning", code: "ZERO_FOOD_COST", message: "Себестоимость = 0 при наличии SKU", category: "Missing data" });
   if (products.length && model.packagingTotal === 0) checks.push({ severity: "warning", code: "ZERO_PACKAGING", message: "Упаковка = 0 при наличии SKU", category: "Missing data" });
-  if (store.avgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "AVG_ITEMS_ZERO", message: "SKU / заказ не может быть 0, иначе food cost и упаковка могут считаться некорректно. Укажите среднее количество позиций в одном заказе.", category: "Store Model" });
+  if (store.avgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "AVG_ITEMS_ZERO", message: "SKU / заказ не может быть 0, иначе себестоимость и упаковка могут считаться некорректно. Укажите среднее количество позиций в одном заказе.", category: "Store Model" });
   const month6 = model.cumulativeCashflow.find((row) => row.month === 6);
   if (month6 && month6.cumulativeCashflow < 0) checks.push({ severity: "warning", code: "NEGATIVE_CF_MONTH_6", message: "Cashflow отрицательный после 6 месяцев", category: "Store Model" });
   if (tax.revenueTaxRate == null && tax.profitTaxRate == null && tax.vatRate == null) checks.push({ severity: "warning", code: "MISSING_TAX", message: "Не задана налоговая assumption", category: "Missing data" });

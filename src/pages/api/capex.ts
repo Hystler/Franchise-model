@@ -25,5 +25,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       source: "ASSUMPTION"
     }
   });
-  res.redirect(303, "/capex");
+  res.redirect(303, "/store-model#capex");
 }

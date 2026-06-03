@@ -24,7 +24,7 @@ export function calculateSensitivity(products: ProductInput[], store: StoreInput
     { parameter: "Аренда", apply: (m) => [store, opex.map((x) => (/rent|аренд/i.test(x.category) ? { ...x, amount: x.amount * m } : x)), capex, tax] },
     { parameter: "ФОТ", apply: (m) => [store, opex.map((x) => (/payroll|фот|зарп/i.test(x.category) ? { ...x, amount: x.amount * m } : x)), capex, tax] },
     { parameter: "Комиссия агрегатора", apply: (m) => [{ ...store, aggregatorCommissionRate: store.aggregatorCommissionRate * m }, opex, capex, tax] },
-    { parameter: "Delivery share", apply: (m) => [{ ...store, deliveryShare: Math.min(100, store.deliveryShare * m) }, opex, capex, tax] },
+    { parameter: "Доля доставки", apply: (m) => [{ ...store, deliveryShare: Math.min(100, store.deliveryShare * m) }, opex, capex, tax] },
     { parameter: "Налоговая ставка", apply: (m) => [store, opex, capex, { ...tax, revenueTaxRate: (tax.revenueTaxRate ?? 0) * m }] },
     { parameter: "CAPEX", apply: (m) => [store, opex, capex.map((x) => ({ ...x, amount: x.amount * m })), tax] },
     { parameter: "Упаковка", apply: (m) => [store, opex.map((x) => (/pack|упаков/i.test(x.category) ? { ...x, amount: x.amount * m } : x)), capex, tax] }

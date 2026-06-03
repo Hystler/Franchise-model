@@ -117,8 +117,8 @@ export default function MenuPage({ economics, products, categories }: any) {
                 {mode === "full" && <th>Полная себестоимость</th>}
                 {(mode === "basic" || mode === "full") && <th>Валовая прибыль</th>}
                 {(mode === "basic" || mode === "full") && <th>Валовая маржа</th>}
-                {(mode === "unit" || mode === "full") && <th>Contribution</th>}
-                {mode === "full" && <th>Маржа contribution</th>}
+                {(mode === "unit" || mode === "full") && <th>Маржинальный вклад</th>}
+                {mode === "full" && <th>Маржа вклада</th>}
                 {(mode === "unit" || mode === "full") && <th>EBITDA/SKU</th>}
                 {(mode === "unit" || mode === "full") && <th>Маржа EBITDA</th>}
                 <th>Статус</th>

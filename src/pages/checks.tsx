@@ -29,7 +29,7 @@ export default function ChecksPage({ checks }: any) {
 
   return (
     <Shell>
-      <div className="pageHeader"><div><h1>Аудит модели</h1><p>Автоматические проверки SKU, незаполненных assumptions и рискованных соотношений.</p></div></div>
+      <div className="pageHeader"><div><h1>Аудит модели</h1><p>Автоматические проверки SKU, незаполненных допущений и рискованных соотношений.</p></div></div>
       <section className="band">
         <div className="segmented wrap">
           {filters.map((item) => <button key={item.value} className={filter === item.value ? "active" : ""} onClick={() => setFilter(item.value)}>{item.label}</button>)}

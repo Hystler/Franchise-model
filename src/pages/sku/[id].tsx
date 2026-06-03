@@ -117,7 +117,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
         <Metric title="Себестоимость" value={rub(economics.ingredientCost)} />
         <Metric title="Упаковка" value={rub(economics.packagingCost)} />
         <Metric title="Валовая прибыль" value={rub(economics.grossProfit)} />
-        <Metric title="Contribution" value={rub(economics.contributionMargin)} />
+        <Metric title="Маржинальный вклад" value={rub(economics.contributionMargin)} />
         <Metric title="EBITDA/SKU" value={rub(economics.ebitdaPerItem)} />
         <Metric title="Маржа EBITDA" value={percent(economics.ebitdaMarginPercent)} />
         <Metric title="Полная себестоимость" value={rub(economics.totalCostPerItem)} />

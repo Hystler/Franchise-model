@@ -632,9 +632,9 @@ function buildSensitivity(
     { factor: "revenue", change: "+10%", adjustment: { revenueMultiplier: 1.1 } },
     { factor: "orders/day", change: "+10%", adjustment: { ordersMultiplier: 1.1 } },
     { factor: "avg check", change: "+10%", adjustment: { avgCheckMultiplier: 1.1 } },
-    { factor: "food cost", change: "+5 p.p.", adjustment: { foodCostPercentDelta: 0.05 } },
+    { factor: "food cost", change: "+5 п.п.", adjustment: { foodCostPercentDelta: 0.05 } },
     { factor: "rent", change: "+10%", adjustment: { rentMultiplier: 1.1 } },
-    { factor: "royalty", change: "+1 p.p.", adjustment: { royaltyRateDelta: 1 } },
+    { factor: "royalty", change: "+1 п.п.", adjustment: { royaltyRateDelta: 1 } },
     { factor: "CAPEX", change: "+10%", adjustment: { capexMultiplier: 1.1 } }
   ];
 
@@ -675,12 +675,12 @@ function buildFranchiseChecks(
   if (franchise.franchiseAvgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "FRANCHISE_ITEMS_ZERO", message: "SKU / заказ франчайзи <= 0" });
   if (f.openingInvestment <= 0) checks.push({ severity: "critical", code: "OPENING_INVESTMENT_ZERO", message: "Инвестиции на открытие <= 0" });
   if (f.paybackMonth == null || f.paybackMonth > 36) checks.push({ severity: "critical", code: "PAYBACK_OVER_36", message: "Payback не достигается за 36 месяцев" });
-  if ((month12?.ebitdaAfterFees ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_FRANCHISEE_EBITDA", message: "EBITDA после fees < 0 в месяце 12" });
-  if ((month12?.netOperatingCashflow ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_MONTH_12_CF", message: "Net cashflow < 0 в месяце 12" });
+  if ((month12?.ebitdaAfterFees ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_FRANCHISEE_EBITDA", message: "EBITDA после платежей < 0 в месяце 12" });
+  if ((month12?.netOperatingCashflow ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_MONTH_12_CF", message: "Операционный cashflow < 0 в месяце 12" });
   if (feeRatio > 0.15) checks.push({ severity: "critical", code: "FRANCHISE_FEES_OVER_15", message: "Royalty + маркетинговый сбор > 15%" });
   if (franchise.monthlyGrowthRatePercent > 10) checks.push({ severity: "warning", code: "GROWTH_OVER_10", message: "Рост тренда > 10% в месяц" });
   if (franchise.monthlyDeclineRatePercent > 10) checks.push({ severity: "warning", code: "DECLINE_OVER_10", message: "Снижение тренда > 10% в месяц" });
-  if (franchise.rampUpStartPercent < 40) checks.push({ severity: "warning", code: "RAMP_START_BELOW_40", message: "Старт ramp-up < 40%" });
+  if (franchise.rampUpStartPercent < 40) checks.push({ severity: "warning", code: "RAMP_START_BELOW_40", message: "Старт разгона < 40%" });
   if (f.paybackMonth != null && f.paybackMonth > 24) checks.push({ severity: "warning", code: "PAYBACK_OVER_24", message: "Payback > 24 месяцев" });
   if (f.annualROI != null && f.annualROI < 0.3) checks.push({ severity: "warning", code: "ROI_BELOW_30", message: "Годовой ROI < 30%" });
   if (f.revenueMonth12 < f.revenueMonth1) checks.push({ severity: "warning", code: "REVENUE_12_BELOW_1", message: "Выручка месяца 12 ниже месяца 1" });
@@ -698,14 +698,14 @@ function buildBreakers(base: ReturnType<typeof buildDetailedCase>, products: Pro
   const payrollRatio = safeDiv(f.fixedCosts.payroll, f.revenue);
   const feeRatio = safeDiv(f.royalty + f.marketingFee + f.supplyChainMarkupCost, f.revenue);
   const foodCostRatio = safeDiv(f.foodCost, f.revenue);
-  if (f.openingInvestment > Math.max(f.netOperatingCashflow * 24, 0)) reasons.push("высокий CAPEX / opening investment");
+  if (f.openingInvestment > Math.max(f.netOperatingCashflow * 24, 0)) reasons.push("высокий CAPEX / инвестиции на открытие");
   if (rentRatio > 0.12) reasons.push("высокая аренда");
   if (payrollRatio > 0.25) reasons.push("высокий ФОТ");
   if (feeRatio > 0.15) reasons.push("высокая комиссия франшизы");
   if (f.revenue <= 0 || f.ebitdaAfterFranchiseFees < 0) reasons.push("низкая выручка");
   if (products.length && f.foodCost === 0) reasons.push("не заполнена себестоимость SKU");
-  if (foodCostRatio > 0.35) reasons.push("высокий food cost");
-  if (f.paybackMonth == null || f.paybackMonth > 24) reasons.push("долгий payback");
+  if (foodCostRatio > 0.35) reasons.push("высокая себестоимость");
+  if (f.paybackMonth == null || f.paybackMonth > 24) reasons.push("долгий Payback");
   if (f.fixedCosts.total <= 0) reasons.push("не заполнен Franchise OPEX");
   return [...new Set(reasons)].slice(0, 8);
 }

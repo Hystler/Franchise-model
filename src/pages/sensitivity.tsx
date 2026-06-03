@@ -1,35 +1,12 @@
-import { Shell } from "@/pages/index";
-import { loadModel } from "@/lib/model";
-import { rub } from "@/lib/format";
-
 export async function getServerSideProps() {
-  const data = await loadModel();
-  return { props: { rows: data.sensitivity } };
+  return {
+    redirect: {
+      destination: "/store-model#sensitivity",
+      permanent: false
+    }
+  };
 }
 
-export default function SensitivityPage({ rows }: any) {
-  return (
-    <Shell>
-      <div className="pageHeader"><div><h1>Sensitivity</h1><p>Показывает влияние ключевых assumptions на EBITDA и Payback. Себестоимость по ингредиентам уточняется через справочник закупок.</p></div></div>
-      <section className="band">
-        <table>
-          <thead><tr><th>Параметр</th><th>-20%</th><th>-10%</th><th>База</th><th>+10%</th><th>+20%</th><th>Влияние на EBITDA</th><th>Влияние на Payback</th></tr></thead>
-          <tbody>
-            {rows.map((row: any) => (
-              <tr key={row.parameter}>
-                <td>{row.parameter}</td>
-                <td>{rub(row.values["-20%"])}</td>
-                <td>{rub(row.values["-10%"])}</td>
-                <td>{rub(row.values.Base)}</td>
-                <td>{rub(row.values["+10%"])}</td>
-                <td>{rub(row.values["+20%"])}</td>
-                <td>{row.impactOnEbitda == null ? "n/a" : rub(row.impactOnEbitda)}</td>
-                <td>{row.impactOnPayback == null ? "n/a" : `${row.impactOnPayback} мес.`}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-    </Shell>
-  );
+export default function SensitivityRedirect() {
+  return null;
 }

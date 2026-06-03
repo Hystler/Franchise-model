@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/router";
 import type { ReactNode } from "react";
 import {
   AlertTriangle,
@@ -125,8 +126,8 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           <h1>Финансовая модель франшизы</h1>
           <p>Расчёт экономики точки, SKU, CAPEX, OPEX, EBITDA, cashflow, Payback, ROI и сценариев масштабирования.</p>
           <div className="badgeRow">
-            <span className="pill">Demo model</span>
-            <span className="pill">Editable assumptions</span>
+            <span className="pill">Демо-модель</span>
+            <span className="pill">Редактируемые допущения</span>
           </div>
         </div>
         <div className="actions">
@@ -139,7 +140,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
       <div className="metrics">
         <Metric title="Выручка / мес" value={rub(summary.monthlyRevenue)} note="Текущая Store Model" icon={<CircleDollarSign size={18} />} />
         <Metric title="Валовая прибыль" value={rub(summary.grossProfit)} note="После себестоимости и упаковки" icon={<TrendingUp size={18} />} />
-        <Metric title="EBITDA" value={rub(summary.ebitda)} note="До налогов и cashflow adjustments" icon={<BarChart3 size={18} />} />
+        <Metric title="EBITDA" value={rub(summary.ebitda)} note="До налогов и cashflow-корректировок" icon={<BarChart3 size={18} />} />
         <Metric title="Маржа EBITDA" value={percent(summary.ebitdaMargin)} note="EBITDA / выручка" icon={<LineChartIcon size={18} />} />
         <Metric title="Операционный cashflow" value={rub(summary.operatingCashflow)} note="После налогов и выплат" icon={<WalletCards size={18} />} />
         <Metric title="Инвестиции на открытие" value={rub(summary.initialInvestment)} note="CAPEX до старта" icon={<ReceiptText size={18} />} />
@@ -160,8 +161,8 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           <Link className="button primary" href="/menu"><Plus size={16} /> Добавить SKU</Link>
           <Link className="button" href="/ingredients"><Layers size={16} /> Добавить ингредиент</Link>
           <Link className="button" href="/store-model"><Calculator size={16} /> Заполнить Store Model</Link>
-          <Link className="button" href="/capex"><ReceiptText size={16} /> Добавить CAPEX</Link>
-          <Link className="button" href="/opex">Добавить OPEX</Link>
+          <Link className="button" href="/store-model#capex"><ReceiptText size={16} /> Добавить CAPEX</Link>
+          <Link className="button" href="/store-model#opex">Добавить OPEX</Link>
           <Link className="button" href="/franchise">Открыть Franchise</Link>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a className="button" href="/api/export/full"><Download size={16} /> Экспорт XLSX</a>
@@ -170,8 +171,8 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
 
       <section className="band">
         <div className="sectionHead">
-          <h2>Revenue / EBITDA / Cashflow</h2>
-          <span>12 месяцев на базе текущих assumptions</span>
+          <h2>Выручка / EBITDA / Cashflow</h2>
+          <span>12 месяцев на базе текущих допущений</span>
         </div>
         <div className="chart">
           <ResponsiveContainer width="100%" height={260}>
@@ -181,9 +182,9 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
               <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
               <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} />
               <Legend />
-              <Bar dataKey="revenue" fill={CHART_COLORS.gold} name="Выручка" radius={[8, 8, 0, 0]} />
-              <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.olive} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.goldSoft, stroke: CHART_COLORS.surface }} name="EBITDA" />
-              <Line type="monotone" dataKey="cashflow" stroke={CHART_COLORS.copper} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.goldSoft, stroke: CHART_COLORS.surface }} name="Cashflow" />
+              <Bar dataKey="revenue" fill={CHART_COLORS.blueSoft} name="Выручка" radius={[8, 8, 0, 0]} />
+              <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.olive} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft, stroke: CHART_COLORS.surface }} name="EBITDA" />
+              <Line type="monotone" dataKey="cashflow" stroke={CHART_COLORS.warning} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.blueSoft, stroke: CHART_COLORS.surface }} name="Cashflow" />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
@@ -205,7 +206,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="emptyState">Заполните SKU, OPEX и налоговые assumptions, чтобы увидеть структуру расходов.</div>}
+            ) : <div className="emptyState">Заполните SKU, OPEX и налоговые допущения, чтобы увидеть структуру расходов.</div>}
           </div>
         </section>
         <section className="band">
@@ -218,7 +219,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
                 <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
                 <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} />
                 <ReferenceLine y={0} stroke={CHART_COLORS.red} />
-                <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.gold} strokeWidth={3} dot={{ r: 3, fill: CHART_COLORS.goldSoft }} activeDot={{ r: 5 }} name="EBITDA" />
+                <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.blueSoft} strokeWidth={3} dot={{ r: 3, fill: CHART_COLORS.blueSoft }} activeDot={{ r: 5 }} name="EBITDA" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -277,12 +278,12 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
                   <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
                   <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
                   <ReferenceLine y={0} stroke={CHART_COLORS.red} strokeDasharray="4 4" />
-                  <Line type="monotone" dataKey="cumulativeCashflow" name="Накопленный cashflow" stroke={CHART_COLORS.gold} strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="cumulativeCashflow" name="Накопленный cashflow" stroke={CHART_COLORS.blueSoft} strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="emptyState"><Link className="button primary" href="/franchise">Заполнить Franchise Mode</Link></div>
+            <div className="emptyState"><Link className="button primary" href="/franchise">Заполнить Franchise</Link></div>
           )}
         </section>
         <section className="band">
@@ -327,26 +328,67 @@ function Diagnostics({ diagnostics }: { diagnostics: any[] }) {
   return (
     <section className="band warningPanel">
       <h2>Почему EBITDA / Cashflow отрицательные</h2>
-      {diagnostics.length ? diagnostics.map((item) => <div className={`check ${item.severity}`} key={item.message}>{item.message}</div>) : <p>Явных причин отрицательных значений сейчас нет. Для реальной модели заполните рецептуры, упаковку и операционные assumptions.</p>}
+      {diagnostics.length ? diagnostics.map((item) => <div className={`check ${item.severity}`} key={item.message}>{item.message}</div>) : <p>Явных причин отрицательных значений сейчас нет. Для реальной модели заполните рецептуры, упаковку и операционные допущения.</p>}
     </section>
   );
 }
 
 export function Shell({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const current = router.pathname;
+  const isData = current === "/menu" || current === "/ingredients" || current.startsWith("/sku");
+  const isStore = current === "/store" || current === "/store-model" || current === "/capex" || current === "/opex" || current === "/sensitivity";
+  const navItems = [
+    { href: "/", label: "Dashboard", icon: <LayoutDashboard size={16} />, active: current === "/" },
+    { href: "/menu", label: "Данные", icon: <Database size={16} />, active: isData },
+    { href: "/store-model", label: "Store Model", icon: <Calculator size={16} />, active: isStore },
+    { href: "/forecast", label: "Прогноз", icon: <TrendingUp size={16} />, active: current === "/forecast" },
+    { href: "/franchise", label: "Franchise", icon: <FileSpreadsheet size={16} />, active: current === "/franchise" },
+    { href: "/audit", label: "Аудит", icon: <ShieldCheck size={16} />, active: current === "/checks" || current === "/audit" }
+  ];
+
   return (
     <div>
       <nav className="nav">
         <Link href="/" className="brand"><LayoutDashboard size={18} /> Franchise Model</Link>
-        <Link href="/menu"><Table2 size={16} /> SKU</Link>
-        <Link href="/ingredients"><Layers size={16} /> Ингредиенты</Link>
-        <Link href="/store-model"><Calculator size={16} /> Store Model</Link>
-        <Link href="/capex">CAPEX</Link>
-        <Link href="/opex">OPEX</Link>
-        <Link href="/sensitivity"><LineChartIcon size={16} /> Sensitivity</Link>
-        <Link href="/franchise"><FileSpreadsheet size={16} /> Franchise</Link>
-        <Link href="/checks"><ShieldCheck size={16} /> Аудит</Link>
+        {navItems.map((item) => (
+          <Link key={item.href} href={item.href} className={item.active ? "active" : ""}>{item.icon}{item.label}</Link>
+        ))}
+        <span className="navSpacer" />
+        <Link href="/import" className="navAction"><FileUp size={16} /> Импорт</Link>
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/api/export/full" className="navAction primaryNavAction"><Download size={16} /> Экспорт XLSX</a>
       </nav>
+      {isData && <DataSubnav />}
+      {isStore && <StoreSubnav />}
       <main className="main">{children}</main>
+    </div>
+  );
+}
+
+function DataSubnav() {
+  return (
+    <div className="subnav">
+      <Link href="/menu"><Table2 size={15} /> SKU</Link>
+      <Link href="/ingredients"><Layers size={15} /> Ингредиенты</Link>
+      <Link href="/menu">Рецептуры</Link>
+      <Link href="/ingredients">Упаковка</Link>
+    </div>
+  );
+}
+
+function StoreSubnav() {
+  return (
+    <div className="subnav">
+      <Link href="/store-model#overview">Overview</Link>
+      <Link href="/store-model#inputs">Inputs</Link>
+      <Link href="/store-model#pnl">P&L</Link>
+      <Link href="/store-model#cashflow">Cashflow</Link>
+      <Link href="/store-model#capex">CAPEX</Link>
+      <Link href="/store-model#opex">OPEX</Link>
+      <Link href="/store-model#sensitivity">Sensitivity</Link>
+      <Link href="/store-model#break-even">Break-even</Link>
+      <Link href="/store-model#checks">Checks</Link>
     </div>
   );
 }
