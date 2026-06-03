@@ -6,7 +6,7 @@ import { Shell } from "@/pages/index";
 import { calculateRecipeItemCost, ingredientCostPerBaseUnit } from "@/calculations/financial";
 import { loadModel } from "@/lib/model";
 import { percent, rub } from "@/lib/format";
-import { statusClass } from "@/pages/menu";
+import { statusClass, statusLabel } from "@/pages/menu";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const data = await loadModel();
@@ -103,8 +103,8 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
       <div className="pageHeader">
         <div>
           <h1>{product.name}</h1>
-          <p>{product.category} · {rub(product.salePrice)} · source: {product.source} · <Link href="/menu">назад к SKU</Link></p>
-          <div className="badgeRow"><span className={`status ${statusClass(economics.status)}`}>{economics.status}</span>{!product.isActive && <span className="pill warningPill">выключен</span>}</div>
+          <p>{product.category} · {rub(product.salePrice)} · источник: {product.source} · <Link href="/menu">назад к SKU</Link></p>
+          <div className="badgeRow"><span className={`status ${statusClass(economics.status)}`}>{statusLabel(economics.status)}</span>{!product.isActive && <span className="pill warningPill">выключен</span>}</div>
         </div>
         <div className="actions">
           <button onClick={() => setSkuEditor(product)}><Edit3 size={16} /> Редактировать</button>
@@ -113,14 +113,14 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
       </div>
 
       <div className="metrics">
-        <Metric title="Price" value={rub(economics.salePrice)} />
-        <Metric title="Ingredient cost" value={rub(economics.ingredientCost)} />
-        <Metric title="Packaging" value={rub(economics.packagingCost)} />
-        <Metric title="Gross profit" value={rub(economics.grossProfit)} />
+        <Metric title="Цена" value={rub(economics.salePrice)} />
+        <Metric title="Себестоимость" value={rub(economics.ingredientCost)} />
+        <Metric title="Упаковка" value={rub(economics.packagingCost)} />
+        <Metric title="Валовая прибыль" value={rub(economics.grossProfit)} />
         <Metric title="Contribution" value={rub(economics.contributionMargin)} />
-        <Metric title="EBITDA/item" value={rub(economics.ebitdaPerItem)} />
-        <Metric title="EBITDA margin" value={percent(economics.ebitdaMarginPercent)} />
-        <Metric title="Total cost/item" value={rub(economics.totalCostPerItem)} />
+        <Metric title="EBITDA/SKU" value={rub(economics.ebitdaPerItem)} />
+        <Metric title="Маржа EBITDA" value={percent(economics.ebitdaMarginPercent)} />
+        <Metric title="Полная себестоимость" value={rub(economics.totalCostPerItem)} />
       </div>
 
       <div className="twoCol">
@@ -132,7 +132,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
         </section>
 
         <section className="band warningPanel">
-          <h2>Warnings</h2>
+          <h2>Предупреждения</h2>
           <div className="checks">
             {warnings.map((warning: string) => <div className="check warning" key={warning}>{warning}</div>)}
             {!warnings.length && <div className="check info">Критичных предупреждений по SKU нет.</div>}
@@ -152,11 +152,11 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
                 <th className="stickyCol">Ингредиент</th>
                 <th>Количество</th>
                 <th>Закупочная цена</th>
-                <th>Cost/unit</th>
-                <th>Total cost</th>
-                <th>Yield/loss</th>
-                <th>Source</th>
-                <th className="stickyAction">Actions</th>
+                <th>Стоимость/ед.</th>
+                <th>Итого</th>
+                <th>Yield/потери</th>
+                <th>Источник</th>
+                <th className="stickyAction">Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -169,7 +169,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
                     <td>{item.ingredient ? `${rub(item.ingredient.purchasePrice)} / ${item.ingredient.purchaseUnit}` : rub(item.unitPurchasePrice)}</td>
                     <td>{item.ingredient ? `${rub(ingredientCostPerBaseUnit(item.ingredient))} / ${baseUnit(item.ingredient.purchaseUnit)}` : rub(item.costPerUnit)}</td>
                     <td>{rub(totalCost)}</td>
-                    <td>{item.ingredient?.edibleYieldPercent ?? 100}% · storage {item.ingredient?.storageLossPercent ?? 0}% · recipe {item.yieldLossPercent ?? 0}%</td>
+                    <td>{item.ingredient?.edibleYieldPercent ?? 100}% · хранение {item.ingredient?.storageLossPercent ?? 0}% · рецепт {item.yieldLossPercent ?? 0}%</td>
                     <td><span className="pill">{item.source ?? item.ingredient?.source ?? "MANUAL"}</span></td>
                     <td className="stickyAction">
                       <div className="iconActions">
@@ -180,7 +180,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
                   </tr>
                 );
               })}
-              {!modelProduct.recipes.length && <tr><td colSpan={8}>Нет рецептуры. Добавьте ингредиенты вручную, чтобы убрать статус missing recipe.</td></tr>}
+              {!modelProduct.recipes.length && <tr><td colSpan={8}>Добавьте ингредиенты, чтобы рассчитать себестоимость и убрать статус «нет рецептуры».</td></tr>}
             </tbody>
           </table>
         </div>
@@ -193,7 +193,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
         </div>
         <div className="tableScroll">
           <table className="skuTable">
-            <thead><tr><th className="stickyCol">Упаковка</th><th>Количество</th><th>Цена за шт</th><th>Стоимость</th><th>Комментарий</th><th className="stickyAction">Actions</th></tr></thead>
+            <thead><tr><th className="stickyCol">Упаковка</th><th>Количество</th><th>Цена за шт.</th><th>Стоимость</th><th>Комментарий</th><th className="stickyAction">Действия</th></tr></thead>
             <tbody>
               {product.packagingLinks.map((link: any) => (
                 <tr key={link.id}>
@@ -210,25 +210,25 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
                   </td>
                 </tr>
               ))}
-              {!product.packagingLinks.length && <tr><td colSpan={6}>Нет упаковки. Добавьте упаковку, чтобы убрать warning.</td></tr>}
+              {!product.packagingLinks.length && <tr><td colSpan={6}>Добавьте упаковку, чтобы модель учитывала коробки, стаканы и расходники.</td></tr>}
             </tbody>
           </table>
         </div>
       </section>
 
       <section className="band">
-        <h2>Calculation breakdown</h2>
+        <h2>Расчет Unit Economics</h2>
         <div className="breakdown">
-          <Row label="Price" value={rub(economics.salePrice)} strong />
-          <Row label="- Ingredient cost" value={rub(economics.ingredientCost)} />
-          <Row label="- Packaging" value={rub(economics.packagingCost)} />
-          <Row label="- Commissions" value={rub(economics.deliveryCommission + economics.acquiringCost)} />
-          <Row label="- Taxes" value={rub(economics.taxPerItem)} />
-          <Row label="- Marketing" value={rub(economics.marketingCostPerItem)} />
-          <Row label="- Delivery logistics" value={rub(economics.deliveryLogisticsCost)} />
-          <Row label="- Fixed allocation" value={rub(economics.allocatedFixedCostPerItem)} />
-          <Row label="- Depreciation" value={rub(economics.depreciationPerItem)} />
-          <Row label="= EBITDA/item" value={`${rub(economics.ebitdaPerItem)} / ${percent(economics.ebitdaMarginPercent)}`} strong />
+          <Row label="Цена" value={rub(economics.salePrice)} strong />
+          <Row label="- Себестоимость" value={rub(economics.ingredientCost)} />
+          <Row label="- Упаковка" value={rub(economics.packagingCost)} />
+          <Row label="- Комиссии" value={rub(economics.deliveryCommission + economics.acquiringCost)} />
+          <Row label="- Налоги" value={rub(economics.taxPerItem)} />
+          <Row label="- Маркетинг" value={rub(economics.marketingCostPerItem)} />
+          <Row label="- Логистика доставки" value={rub(economics.deliveryLogisticsCost)} />
+          <Row label="- Распределённый OPEX" value={rub(economics.allocatedFixedCostPerItem)} />
+          <Row label="- Амортизация" value={rub(economics.depreciationPerItem)} />
+          <Row label="= EBITDA/SKU" value={`${rub(economics.ebitdaPerItem)} / ${percent(economics.ebitdaMarginPercent)}`} strong />
         </div>
       </section>
 
@@ -237,10 +237,10 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
           <label>Название<input value={skuEditor.name} onChange={(e) => setSkuEditor({ ...skuEditor, name: e.target.value })} /></label>
           <label>Категория<input value={skuEditor.category} onChange={(e) => setSkuEditor({ ...skuEditor, category: e.target.value })} /></label>
           <label>Цена, ₽<input type="number" min={0} step={10} value={skuEditor.salePrice} onChange={(e) => setSkuEditor({ ...skuEditor, salePrice: Number(e.target.value) })} /></label>
-          <label>Source<select value={skuEditor.source} onChange={(e) => setSkuEditor({ ...skuEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED_MENU</option><option>ASSUMPTION</option></select></label>
+          <label>Источник<select value={skuEditor.source} onChange={(e) => setSkuEditor({ ...skuEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED_MENU</option><option>ASSUMPTION</option></select></label>
           <label className="wide">Описание<textarea value={skuEditor.description ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, description: e.target.value })} /></label>
-          <label>Image URL<input value={skuEditor.imageUrl ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, imageUrl: e.target.value })} /></label>
-          <label>Product URL<input value={skuEditor.productUrl ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, productUrl: e.target.value })} /></label>
+          <label>URL изображения<input value={skuEditor.imageUrl ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, imageUrl: e.target.value })} /></label>
+          <label>URL продукта<input value={skuEditor.productUrl ?? ""} onChange={(e) => setSkuEditor({ ...skuEditor, productUrl: e.target.value })} /></label>
           <label className="checkLine"><input type="checkbox" checked={skuEditor.isActive} onChange={(e) => setSkuEditor({ ...skuEditor, isActive: e.target.checked })} /> Активен</label>
         </Editor>
       )}
@@ -258,13 +258,13 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
               <label>Новый ингредиент<input value={recipeEditor.newIngredient.name} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, name: e.target.value } })} /></label>
               <label>Категория<input value={recipeEditor.newIngredient.category} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, category: e.target.value } })} /></label>
               <label>Цена закупки, ₽<input type="number" min={0} step={10} value={recipeEditor.newIngredient.purchasePrice} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, purchasePrice: Number(e.target.value) } })} /></label>
-              <label>Единица<select value={recipeEditor.newIngredient.purchaseUnit} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, purchaseUnit: e.target.value } })}><option>kg</option><option>g</option><option>liter</option><option>ml</option><option>piece</option></select></label>
+              <label>Единица<select value={recipeEditor.newIngredient.purchaseUnit} onChange={(e) => setRecipeEditor({ ...recipeEditor, newIngredient: { ...recipeEditor.newIngredient, purchaseUnit: e.target.value } })}><option value="kg">кг</option><option value="g">г</option><option value="liter">л</option><option value="ml">мл</option><option value="piece">шт.</option></select></label>
               <button type="button" onClick={() => setInlineIngredient(false)}>Выбрать из справочника</button>
             </>
           )}
           <label>Количество<input type="number" min={0} step={1} value={recipeEditor.quantity ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, quantity: Number(e.target.value) })} /></label>
-          <label>Единица<select value={recipeEditor.unit ?? "g"} onChange={(e) => setRecipeEditor({ ...recipeEditor, unit: e.target.value })}><option>g</option><option>ml</option><option>piece</option></select></label>
-          <label>Yield loss, %<input type="number" min={0} max={100} step={1} value={recipeEditor.yieldLossPercent ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, yieldLossPercent: Number(e.target.value) })} /></label>
+          <label>Единица<select value={recipeEditor.unit ?? "g"} onChange={(e) => setRecipeEditor({ ...recipeEditor, unit: e.target.value })}><option value="g">г</option><option value="ml">мл</option><option value="piece">шт.</option></select></label>
+          <label>Потери в рецепте, %<input type="number" min={0} max={100} step={1} value={recipeEditor.yieldLossPercent ?? 0} onChange={(e) => setRecipeEditor({ ...recipeEditor, yieldLossPercent: Number(e.target.value) })} /></label>
           <label className="wide">Комментарий<textarea value={recipeEditor.comment ?? ""} onChange={(e) => setRecipeEditor({ ...recipeEditor, comment: e.target.value })} /></label>
         </Editor>
       )}
@@ -274,7 +274,7 @@ export default function SkuDetail({ product, modelProduct, economics, ingredient
           <label className="wide">Упаковка<select value={packEditor.packagingId} onChange={(e) => setPackEditor({ ...packEditor, packagingId: e.target.value })}>{packaging.map((item: any) => <option key={item.id} value={item.id}>{item.name} · {rub(item.costPerUnit)}</option>)}</select></label>
           <label>Количество<input type="number" min={0} step={1} value={packEditor.units ?? 1} onChange={(e) => setPackEditor({ ...packEditor, units: Number(e.target.value) })} /></label>
           <label className="wide">Комментарий<textarea value={packEditor.comment ?? ""} onChange={(e) => setPackEditor({ ...packEditor, comment: e.target.value })} /></label>
-          {!packaging.length && <p className="muted wide">Сначала создайте упаковку на странице Ingredients & Packaging.</p>}
+          {!packaging.length && <p className="muted wide">Сначала создайте упаковку на странице «Ингредиенты и упаковка».</p>}
         </Editor>
       )}
     </Shell>
@@ -308,5 +308,5 @@ function defaultIngredient() {
 function baseUnit(unit: string) {
   if (unit === "kg" || unit === "g") return "g";
   if (unit === "liter" || unit === "ml") return "ml";
-  return "piece";
+  return "шт.";
 }

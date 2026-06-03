@@ -591,8 +591,8 @@ describe("financial calculations", () => {
 
   it("main dashboard contains KPI cards and chart sections", () => {
     const dashboard = readFileSync("src/pages/index.tsx", "utf8");
-    expect(dashboard).toContain("Monthly revenue");
-    expect(dashboard).toContain("Franchise payback preview");
-    expect(dashboard).toContain("Data completeness");
+    expect(dashboard).toContain("Выручка / мес");
+    expect(dashboard).toContain("Payback Franchise");
+    expect(dashboard).toContain("Заполненность модели");
   });
 });

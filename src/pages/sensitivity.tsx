@@ -10,10 +10,10 @@ export async function getServerSideProps() {
 export default function SensitivityPage({ rows }: any) {
   return (
     <Shell>
-      <div className="pageHeader"><div><h1>Sensitivity Analysis</h1><p>Показывает влияние ключевых assumptions на EBITDA и payback. Food cost по ингредиентам будет расширен после ввода детального справочника закупок.</p></div></div>
+      <div className="pageHeader"><div><h1>Sensitivity</h1><p>Показывает влияние ключевых assumptions на EBITDA и Payback. Себестоимость по ингредиентам уточняется через справочник закупок.</p></div></div>
       <section className="band">
         <table>
-          <thead><tr><th>Параметр</th><th>-20%</th><th>-10%</th><th>Base</th><th>+10%</th><th>+20%</th><th>Impact on EBITDA</th><th>Impact on Payback</th></tr></thead>
+          <thead><tr><th>Параметр</th><th>-20%</th><th>-10%</th><th>База</th><th>+10%</th><th>+20%</th><th>Влияние на EBITDA</th><th>Влияние на Payback</th></tr></thead>
           <tbody>
             {rows.map((row: any) => (
               <tr key={row.parameter}>

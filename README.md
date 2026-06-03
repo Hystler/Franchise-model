@@ -1,6 +1,6 @@
-# Franchise Model: SKU Unit Economics Constructor
+# Franchise Model — финансовая модель франшизы
 
-Локальное Next.js-приложение для финансовой модели фастфуд-франшизы: ручное меню SKU, рецептуры, ингредиенты, упаковка, unit-economics по каждой позиции, Store P&L, CAPEX, OPEX, checks, sensitivity и XLSX-export.
+Next.js-приложение для премиальной финансовой модели фастфуд/QSR-франшизы: ручное меню SKU, рецептуры, ингредиенты, упаковка, Unit Economics по каждой позиции, Store P&L, CAPEX, OPEX, аудит модели, Sensitivity и XLSX-export.
 
 ## Принцип данных
 
@@ -43,9 +43,9 @@ Seed создаёт демонстрационный набор editable assumpt
 
 ### Demo seed
 
-`npm run db:seed` now fills the app with an idempotent demo dataset for portfolio/recruiting use: 15 SKU, demo ingredients, packaging, recipes, Store Model inputs, OPEX, CAPEX and Franchise Mode assumptions.
+`npm run db:seed` наполняет приложение идемпотентным demo dataset для портфолио и рекрутинга: 15 SKU, демо-ингредиенты, упаковка, рецептуры, вводные Store Model, OPEX, CAPEX и assumptions Franchise.
 
-The numbers are deliberately illustrative. They are meant to make the dashboard, unit economics, checks, franchise calculator and XLSX export look like a live product demo. They are editable by the user and are not a real franchise valuation, financial recommendation or investment advice.
+Цифры намеренно иллюстративные. Они нужны, чтобы Dashboard, Unit Economics, аудит, Franchise calculator и XLSX-export выглядели как живой продукт. Пользователь может менять все значения. Данные не являются реальной оценкой франшизы, финансовой рекомендацией или инвестиционным советом.
 
 ## SKU
 
@@ -63,9 +63,9 @@ The numbers are deliberately illustrative. They are meant to make the dashboard,
 
 Таблица имеет три режима:
 
-- `Basic` — категория, SKU, цена, ingredient cost, packaging, gross margin, status, actions;
-- `Unit economics` — цена, ingredient cost, packaging, variable cost, contribution, EBITDA/item, status;
-- `Full finance` — полный набор колонок: комиссии, налоги, fixed allocation, depreciation, total cost/item и маржинальность.
+- `Базовый` — категория, SKU, цена, себестоимость, упаковка, валовая маржа, статус, действия;
+- `Unit Economics` — цена, себестоимость, упаковка, переменные расходы, contribution, EBITDA/SKU, статус;
+- `Полная экономика` — полный набор колонок: комиссии, налоги, распределённый OPEX, амортизация, полная себестоимость и маржинальность.
 
 Широкая таблица имеет horizontal scroll, sticky header, sticky SKU-column и pinned actions справа.
 
@@ -169,20 +169,20 @@ packagingCost = sum(packaging.costPerUnit * quantity)
 
 ## Dashboard и графики
 
-Главная `JK Finance` — это рабочий dashboard, а не только навигация. На первом экране есть KPI: monthly revenue, gross profit, EBITDA, EBITDA margin, operating cashflow, opening investment, payback, break-even orders/day, active SKU count, SKU with missing recipe и SKU with negative EBITDA.
+Главная `Franchise Model` — это рабочий премиальный Dashboard, а не только навигация. На первом экране есть KPI: выручка / мес, валовая прибыль, EBITDA, маржа EBITDA, операционный cashflow, инвестиции на открытие, Payback, Break-even / день, активные SKU, SKU без рецептуры и SKU с отрицательной EBITDA.
 
 Dashboard показывает:
 
-- Revenue / EBITDA / Cashflow chart на 12 месяцев;
-- Cost structure donut;
-- SKU economics chart: top SKU по EBITDA/item;
-- Break-even chart с нулевой линией;
-- Franchise payback preview, если Franchise Mode заполнен;
-- Alerts / Checks;
-- Quick Actions;
-- Data completeness по SKU prices, recipes, packaging, CAPEX, OPEX, Store Model и Franchise Mode.
+- график `Выручка / EBITDA / Cashflow` на 12 месяцев;
+- donut структуры расходов;
+- график Unit Economics SKU: топ SKU по EBITDA/SKU;
+- график Break-even с нулевой линией;
+- preview Payback Franchise, если Franchise заполнен;
+- аудит модели;
+- быстрые действия;
+- заполненность модели по ценам SKU, рецептурам, упаковке, CAPEX, OPEX, Store Model и Franchise.
 
-Dashboard не строит бессмысленный SKU chart, если у SKU нет себестоимости. Вместо графика показывается empty state.
+Dashboard не строит бессмысленный SKU chart, если у SKU нет себестоимости. Вместо графика показывается понятное пустое состояние.
 
 Для длинных SKU названия обрезаются до короткого варианта, а полное название доступно в tooltip. Если SKU больше 10, рейтинг показывает top 10, а полный список смотрите в `/menu`.
 
@@ -283,27 +283,27 @@ Cashflow считается помесячно: revenue, orders, items, COGS, va
 - `Cumulative cashflow never becomes positive in 36 months`;
 - `Royalty + marketing fee > 15% revenue`;
 - `Franchisee EBITDA margin after fees < 10%`;
-- `Payback > 24 months`;
+- `Payback > 24 месяцев`;
 - `ROI < 30%`;
-- `Support cost per franchisee > royalty + marketing fee`;
-- missing CAPEX / OPEX / SKU себестоимость / taxes.
+- поддержка франчайзи выше royalty + маркетингового сбора;
+- не заполнены CAPEX / OPEX / себестоимость SKU / налоги.
 
-На странице есть Revenue trend chart, EBITDA / Net cashflow chart, payback chart, margin chart, franchisor revenue donut, Base / Downside / Upside scenarios и sensitivity. Payback chart читается так: линия ниже нуля показывает еще не окупившийся cumulative cashflow, пересечение нуля — месяц окупаемости.
+На странице есть график тренда выручки, `EBITDA / Net cashflow`, график Payback, график маржинальности, donut выручки франчайзера, сценарии Base / Downside / Upside и Sensitivity. Payback chart читается так: линия ниже нуля показывает еще не окупившийся cumulative cashflow, пересечение нуля — месяц окупаемости.
 
-## Checks
+## Аудит модели
 
 Страница `/checks` имеет фильтры:
 
-- All;
-- Critical;
-- Warning;
-- Missing data;
+- Все;
+- Критичные;
+- Предупреждения;
+- Нет данных;
 - SKU;
 - Store Model;
 - CAPEX;
 - OPEX.
 
-Проверяются SKU без рецептуры/упаковки, цена 0, ingredient cost 0, fake high margin, negative contribution, negative EBITDA, food cost > 40%, packaging > 10% от цены и total cost > price.
+Проверяются SKU без рецептуры/упаковки, цена 0, себестоимость 0, завышенная маржа из-за отсутствующей рецептуры, negative contribution, negative EBITDA, себестоимость > 40%, упаковка > 10% от цены и полная себестоимость выше цены.
 
 ## Экспорт
 
@@ -338,8 +338,8 @@ Cashflow считается помесячно: revenue, orders, items, COGS, va
 - `Franchise Sensitivity`
 - `Franchise Checks`
 
-В `SKU Unit Economics` есть price, ingredient cost, packaging, gross profit, gross margin, variable costs, contribution, allocated fixed cost, depreciation, EBITDA/item, status и warnings.
-В franchise-листах есть inputs, P&L франчайзи, 24-месячный cashflow, модель франчайзера, сценарии, sensitivity и checks.
+В `SKU Unit Economics` есть цена, себестоимость, упаковка, валовая прибыль, валовая маржа, переменные расходы, contribution, распределённый OPEX, амортизация, EBITDA/SKU, статус и warnings.
+В franchise-листах есть вводные, P&L франчайзи, 24-месячный cashflow, модель франчайзера, сценарии, Sensitivity и аудит.
 
 XLSX генерируется в памяти и отдаётся response без записи файлов на диск, поэтому route совместим с serverless.
 

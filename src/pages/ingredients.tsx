@@ -85,8 +85,8 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
     <Shell>
       <div className="pageHeader">
         <div>
-          <h1>Ingredients & Packaging</h1>
-          <p>Справочники закупочных цен, yield/loss и упаковки. Эти данные питают рецептуры SKU и unit-economics.</p>
+          <h1>Ингредиенты и упаковка</h1>
+          <p>Справочники закупочных цен, yield/потерь и упаковки. Эти данные питают рецептуры SKU и Unit Economics.</p>
         </div>
         <div className="actions">
           <button className="primary" onClick={() => setIngredientEditor(ingredientBlank)}><Plus size={16} /> Ингредиент</button>
@@ -108,10 +108,10 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
                 <th>Поставщик</th>
                 <th>Закупка</th>
                 <th>Единица</th>
-                <th>Cost base unit</th>
-                <th>Yield</th>
-                <th>Source</th>
-                <th className="stickyAction">Actions</th>
+                <th>Цена базовой единицы</th>
+                <th>Yield / потери</th>
+                <th>Источник</th>
+                <th className="stickyAction">Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -123,7 +123,7 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
                   <td>{rub(item.purchasePrice)}</td>
                   <td>{item.purchaseUnit}</td>
                   <td>{rub(baseUnitCost(item))} / {baseUnit(item.purchaseUnit)}</td>
-                  <td>{item.edibleYieldPercent ?? 100}% / loss {item.storageLossPercent ?? 0}%</td>
+                  <td>{item.edibleYieldPercent ?? 100}% / потери {item.storageLossPercent ?? 0}%</td>
                   <td><span className="pill">{item.source}</span></td>
                   <td className="stickyAction">
                     <div className="iconActions">
@@ -147,7 +147,7 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
         <div className="tableScroll">
           <table className="skuTable">
             <thead>
-              <tr><th className="stickyCol">Название</th><th>Стоимость</th><th>Поставщик</th><th>Комментарий</th><th>Source</th><th className="stickyAction">Actions</th></tr>
+              <tr><th className="stickyCol">Название</th><th>Стоимость</th><th>Поставщик</th><th>Комментарий</th><th>Источник</th><th className="stickyAction">Действия</th></tr>
             </thead>
             <tbody>
               {packaging.map((item: any) => (
@@ -165,7 +165,7 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
                   </td>
                 </tr>
               ))}
-              {!packaging.length && <tr><td colSpan={6}>Упаковки пока нет.</td></tr>}
+              {!packaging.length && <tr><td colSpan={6}>Добавьте упаковку, чтобы расчет SKU учитывал коробки, стаканы и расходники.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -177,10 +177,10 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
           <label>Категория<input value={ingredientEditor.category ?? ""} onChange={(e) => setIngredientEditor({ ...ingredientEditor, category: e.target.value })} /></label>
           <label>Поставщик<input value={ingredientEditor.supplier ?? ""} onChange={(e) => setIngredientEditor({ ...ingredientEditor, supplier: e.target.value })} /></label>
           <label>Закупочная цена, ₽<input type="number" min={0} step={10} value={ingredientEditor.purchasePrice} onChange={(e) => setIngredientEditor({ ...ingredientEditor, purchasePrice: Number(e.target.value) })} /></label>
-          <label>Единица закупки<select value={ingredientEditor.purchaseUnit} onChange={(e) => setIngredientEditor({ ...ingredientEditor, purchaseUnit: e.target.value })}><option>kg</option><option>g</option><option>liter</option><option>ml</option><option>piece</option></select></label>
-          <label>Edible yield, %<input type="number" min={0} max={100} step={1} value={ingredientEditor.edibleYieldPercent ?? 100} onChange={(e) => setIngredientEditor({ ...ingredientEditor, edibleYieldPercent: Number(e.target.value) })} /></label>
-          <label>Storage loss, %<input type="number" min={0} max={100} step={1} value={ingredientEditor.storageLossPercent ?? 0} onChange={(e) => setIngredientEditor({ ...ingredientEditor, storageLossPercent: Number(e.target.value) })} /></label>
-          <label>Source<select value={ingredientEditor.source} onChange={(e) => setIngredientEditor({ ...ingredientEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED</option><option>ASSUMPTION</option></select></label>
+          <label>Единица закупки<select value={ingredientEditor.purchaseUnit} onChange={(e) => setIngredientEditor({ ...ingredientEditor, purchaseUnit: e.target.value })}><option value="kg">кг</option><option value="g">г</option><option value="liter">л</option><option value="ml">мл</option><option value="piece">шт.</option></select></label>
+          <label>Полезный выход, %<input type="number" min={0} max={100} step={1} value={ingredientEditor.edibleYieldPercent ?? 100} onChange={(e) => setIngredientEditor({ ...ingredientEditor, edibleYieldPercent: Number(e.target.value) })} /></label>
+          <label>Потери хранения, %<input type="number" min={0} max={100} step={1} value={ingredientEditor.storageLossPercent ?? 0} onChange={(e) => setIngredientEditor({ ...ingredientEditor, storageLossPercent: Number(e.target.value) })} /></label>
+          <label>Источник<select value={ingredientEditor.source} onChange={(e) => setIngredientEditor({ ...ingredientEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED</option><option>ASSUMPTION</option></select></label>
           <label className="wide">Комментарий<textarea value={ingredientEditor.comment ?? ""} onChange={(e) => setIngredientEditor({ ...ingredientEditor, comment: e.target.value })} /></label>
         </EditorModal>
       )}
@@ -190,7 +190,7 @@ export default function IngredientsPage({ ingredients, packaging }: any) {
           <label>Название<input value={packagingEditor.name} onChange={(e) => setPackagingEditor({ ...packagingEditor, name: e.target.value })} /></label>
           <label>Стоимость за штуку, ₽<input type="number" min={0} step={1} value={packagingEditor.costPerUnit} onChange={(e) => setPackagingEditor({ ...packagingEditor, costPerUnit: Number(e.target.value) })} /></label>
           <label>Поставщик<input value={packagingEditor.supplier ?? ""} onChange={(e) => setPackagingEditor({ ...packagingEditor, supplier: e.target.value })} /></label>
-          <label>Source<select value={packagingEditor.source} onChange={(e) => setPackagingEditor({ ...packagingEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED</option><option>ASSUMPTION</option></select></label>
+          <label>Источник<select value={packagingEditor.source} onChange={(e) => setPackagingEditor({ ...packagingEditor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED</option><option>ASSUMPTION</option></select></label>
           <label className="wide">Комментарий<textarea value={packagingEditor.comment ?? ""} onChange={(e) => setPackagingEditor({ ...packagingEditor, comment: e.target.value })} /></label>
         </EditorModal>
       )}
@@ -218,5 +218,5 @@ function baseUnitCost(item: any) {
 function baseUnit(unit: string) {
   if (unit === "kg" || unit === "g") return "g";
   if (unit === "liter" || unit === "ml") return "ml";
-  return "piece";
+  return "шт.";
 }

@@ -297,11 +297,11 @@ export function diagnoseNegativeResults(model: StoreModelResult, store: StoreInp
   if (store.avgItemsPerOrder <= 0) diagnostics.push({ severity: "critical", message: "SKU / заказ равен 0. Это ломает расчет unit economics." });
   if (model.ebitdaMargin < 0) {
     const reasons = [
-      { label: "Fixed costs", value: model.fixedCosts },
-      { label: "Variable costs", value: model.variableCosts },
-      { label: "Food cost", value: model.foodCostTotal },
-      { label: "Packaging", value: model.packagingTotal },
-      { label: "Taxes", value: model.taxPaid }
+      { label: "постоянные расходы", value: model.fixedCosts },
+      { label: "переменные расходы", value: model.variableCosts },
+      { label: "себестоимость", value: model.foodCostTotal },
+      { label: "упаковка", value: model.packagingTotal },
+      { label: "налоги", value: model.taxPaid }
     ]
       .sort((a, b) => b.value - a.value)
       .slice(0, 3)
@@ -347,38 +347,38 @@ export function runChecks(
     if (value != null && value < 0) checks.push({ severity: "critical", code: "PERCENT_BELOW_0", message: `${field}: процентное поле < 0%`, category: "Store Model" });
   });
   opex.filter((item) => item.driver === "LINKED_TO_REVENUE").forEach((item) => {
-    if (item.amount > 100) checks.push({ severity: "critical", code: "PERCENT_OVER_100", message: `${item.category}: OPEX linked to revenue > 100%`, category: "OPEX" });
+    if (item.amount > 100) checks.push({ severity: "critical", code: "PERCENT_OVER_100", message: `${item.category}: OPEX от выручки > 100%`, category: "OPEX" });
   });
   economics.forEach((sku) => {
     if (sku.salePrice <= 0) checks.push({ severity: "critical", code: "ZERO_SKU_PRICE", message: `${sku.name}: цена SKU = 0`, category: "SKU" });
     if (!sku.hasRecipe) checks.push({ severity: "warning", code: "MISSING_RECIPE", message: `${sku.name}: нет рецептуры`, category: "Missing data" });
     if (!sku.hasPackaging) checks.push({ severity: "warning", code: "MISSING_PACKAGING", message: `${sku.name}: нет упаковки`, category: "Missing data" });
-    if (sku.ingredientCost === 0) checks.push({ severity: "warning", code: "ZERO_INGREDIENT_COST", message: `${sku.name}: ingredient cost = 0`, category: "SKU" });
-    if (sku.missingRecipeData && sku.grossMarginPercent > 0.9) checks.push({ severity: "warning", code: "FAKE_HIGH_MARGIN", message: `${sku.name}: gross margin > 90% из-за отсутствующей рецептуры`, category: "Missing data" });
-    if (safeDiv(sku.ingredientCost, sku.salePrice) > 0.4) checks.push({ severity: "warning", code: "FOOD_COST_HIGH", message: `${sku.name}: food cost > 40%`, category: "SKU" });
-    if (safeDiv(sku.packagingCost, sku.salePrice) > 0.1) checks.push({ severity: "warning", code: "PACKAGING_COST_HIGH", message: `${sku.name}: packaging cost > 10% от цены`, category: "SKU" });
+    if (sku.ingredientCost === 0) checks.push({ severity: "warning", code: "ZERO_INGREDIENT_COST", message: `${sku.name}: себестоимость = 0`, category: "SKU" });
+    if (sku.missingRecipeData && sku.grossMarginPercent > 0.9) checks.push({ severity: "warning", code: "FAKE_HIGH_MARGIN", message: `${sku.name}: валовая маржа > 90% из-за отсутствующей рецептуры`, category: "Missing data" });
+    if (safeDiv(sku.ingredientCost, sku.salePrice) > 0.4) checks.push({ severity: "warning", code: "FOOD_COST_HIGH", message: `${sku.name}: себестоимость > 40%`, category: "SKU" });
+    if (safeDiv(sku.packagingCost, sku.salePrice) > 0.1) checks.push({ severity: "warning", code: "PACKAGING_COST_HIGH", message: `${sku.name}: упаковка > 10% от цены`, category: "SKU" });
     if (sku.contributionMargin < 0) checks.push({ severity: "critical", code: "NEGATIVE_SKU_CM", message: `${sku.name}: contribution margin < 0`, category: "SKU" });
     if (sku.ebitdaPerItem < 0) checks.push({ severity: "critical", code: "NEGATIVE_SKU_EBITDA", message: `${sku.name}: EBITDA/item < 0`, category: "SKU" });
-    if (sku.totalCostPerItem > sku.salePrice) checks.push({ severity: "critical", code: "TOTAL_COST_OVER_PRICE", message: `${sku.name}: total cost > price`, category: "SKU" });
+    if (sku.totalCostPerItem > sku.salePrice) checks.push({ severity: "critical", code: "TOTAL_COST_OVER_PRICE", message: `${sku.name}: полная себестоимость выше цены`, category: "SKU" });
   });
   if (model.ebitdaMargin < 0.1) checks.push({ severity: "warning", code: "LOW_EBITDA_MARGIN", message: "EBITDA margin < 10%", category: "Store Model" });
   if (model.ebitdaMargin < 0) checks.push({ severity: "warning", code: "NEGATIVE_EBITDA_MARGIN", message: "EBITDA margin < 0%", category: "Store Model" });
-  if (model.operatingCashflow < 0) checks.push({ severity: "warning", code: "NEGATIVE_OPERATING_CF", message: "Operating cashflow < 0", category: "Store Model" });
+  if (model.operatingCashflow < 0) checks.push({ severity: "warning", code: "NEGATIVE_OPERATING_CF", message: "Операционный cashflow < 0", category: "Store Model" });
   if ((model.paybackMonth ?? 999) > 24) checks.push({ severity: "warning", code: "LONG_PAYBACK", message: "Окупаемость > 24 месяцев или не достигается", category: "Store Model" });
   const rent = opex.find((item) => item.category.toLowerCase().includes("rent") || item.category.toLowerCase().includes("аренд"))?.amount ?? 0;
-  if (safeDiv(rent, model.monthlyRevenue) > 0.12) checks.push({ severity: "warning", code: "RENT_RATIO_HIGH", message: "Аренда / revenue > 12%", category: "OPEX" });
+  if (safeDiv(rent, model.monthlyRevenue) > 0.12) checks.push({ severity: "warning", code: "RENT_RATIO_HIGH", message: "Аренда / выручка > 12%", category: "OPEX" });
   const payroll = opex.filter((item) => /payroll|фот|зарп/i.test(item.category)).reduce((sum, item) => sum + item.amount, 0);
-  if (safeDiv(payroll, model.monthlyRevenue) > 0.25) checks.push({ severity: "warning", code: "PAYROLL_RATIO_HIGH", message: "ФОТ / revenue > 25%", category: "OPEX" });
+  if (safeDiv(payroll, model.monthlyRevenue) > 0.25) checks.push({ severity: "warning", code: "PAYROLL_RATIO_HIGH", message: "ФОТ / выручка > 25%", category: "OPEX" });
   const deliveryCommissionRatio = percentDecimal(store.aggregatorCommissionRate) * percentDecimal(store.aggregatorShare) * percentDecimal(store.deliveryShare);
-  if (deliveryCommissionRatio > 0.15) checks.push({ severity: "warning", code: "DELIVERY_COMMISSION_HIGH", message: "Комиссия агрегаторов > 15% revenue", category: "Store Model" });
-  if (store.deliveryShare > 100) checks.push({ severity: "critical", code: "DELIVERY_SHARE_OVER_100", message: "Delivery share > 100%", category: "Store Model" });
-  if (store.aggregatorShare > 100) checks.push({ severity: "critical", code: "AGGREGATOR_SHARE_OVER_100", message: "Aggregator share > 100%", category: "Store Model" });
-  if (store.aggregatorCommissionRate > 40) checks.push({ severity: "warning", code: "AGGREGATOR_COMMISSION_HIGH", message: "Aggregator commission > 40%", category: "Store Model" });
-  if ((tax.revenueTaxRate ?? 0) > 15) checks.push({ severity: "warning", code: "REVENUE_TAX_HIGH", message: "Revenue tax rate > 15%", category: "Store Model" });
-  if (safeDiv(model.taxPaid, model.monthlyRevenue) > 0.3) checks.push({ severity: "warning", code: "TAX_LOAD_HIGH", message: "Tax paid > 30% revenue", category: "Store Model" });
-  if (model.variableCosts > model.monthlyRevenue) checks.push({ severity: "critical", code: "VARIABLE_COSTS_OVER_REVENUE", message: "Variable costs > revenue", category: "Store Model" });
-  if (products.length && model.foodCostTotal === 0) checks.push({ severity: "warning", code: "ZERO_FOOD_COST", message: "Food cost = 0 while SKU exist", category: "Missing data" });
-  if (products.length && model.packagingTotal === 0) checks.push({ severity: "warning", code: "ZERO_PACKAGING", message: "Packaging = 0 while SKU exist", category: "Missing data" });
+  if (deliveryCommissionRatio > 0.15) checks.push({ severity: "warning", code: "DELIVERY_COMMISSION_HIGH", message: "Комиссия агрегаторов > 15% выручки", category: "Store Model" });
+  if (store.deliveryShare > 100) checks.push({ severity: "critical", code: "DELIVERY_SHARE_OVER_100", message: "Доля доставки > 100%", category: "Store Model" });
+  if (store.aggregatorShare > 100) checks.push({ severity: "critical", code: "AGGREGATOR_SHARE_OVER_100", message: "Доля агрегаторов > 100%", category: "Store Model" });
+  if (store.aggregatorCommissionRate > 40) checks.push({ severity: "warning", code: "AGGREGATOR_COMMISSION_HIGH", message: "Комиссия агрегатора > 40%", category: "Store Model" });
+  if ((tax.revenueTaxRate ?? 0) > 15) checks.push({ severity: "warning", code: "REVENUE_TAX_HIGH", message: "Налог с выручки > 15%", category: "Store Model" });
+  if (safeDiv(model.taxPaid, model.monthlyRevenue) > 0.3) checks.push({ severity: "warning", code: "TAX_LOAD_HIGH", message: "Налоги > 30% выручки", category: "Store Model" });
+  if (model.variableCosts > model.monthlyRevenue) checks.push({ severity: "critical", code: "VARIABLE_COSTS_OVER_REVENUE", message: "Переменные расходы выше выручки", category: "Store Model" });
+  if (products.length && model.foodCostTotal === 0) checks.push({ severity: "warning", code: "ZERO_FOOD_COST", message: "Себестоимость = 0 при наличии SKU", category: "Missing data" });
+  if (products.length && model.packagingTotal === 0) checks.push({ severity: "warning", code: "ZERO_PACKAGING", message: "Упаковка = 0 при наличии SKU", category: "Missing data" });
   if (store.avgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "AVG_ITEMS_ZERO", message: "SKU / заказ не может быть 0, иначе food cost и упаковка могут считаться некорректно. Укажите среднее количество позиций в одном заказе.", category: "Store Model" });
   const month6 = model.cumulativeCashflow.find((row) => row.month === 6);
   if (month6 && month6.cumulativeCashflow < 0) checks.push({ severity: "warning", code: "NEGATIVE_CF_MONTH_6", message: "Cashflow отрицательный после 6 месяцев", category: "Store Model" });
@@ -387,7 +387,7 @@ export function runChecks(
     checks.push({ severity: "warning", code: "MISSING_DEPRECIATION_LIFE", message: `${item.category}: не задан срок амортизации`, category: "CAPEX" });
   });
   opex.filter((item) => !item.category.trim()).forEach(() => {
-    checks.push({ severity: "warning", code: "EMPTY_OPEX_NAME", message: "OPEX item with empty name", category: "OPEX" });
+    checks.push({ severity: "warning", code: "EMPTY_OPEX_NAME", message: "Статья OPEX без названия", category: "OPEX" });
   });
   if (!products.length) checks.push({ severity: "critical", code: "EMPTY_MENU", message: "Меню пустое: импортируйте или внесите SKU", category: "SKU" });
   return checks;

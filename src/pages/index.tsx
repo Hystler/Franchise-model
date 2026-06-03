@@ -1,8 +1,28 @@
 import Link from "next/link";
-import { AlertTriangle, Download, FileUp, Gauge, PackagePlus, Plus, Table2, Wheat } from "lucide-react";
+import type { ReactNode } from "react";
+import {
+  AlertTriangle,
+  BarChart3,
+  Calculator,
+  CircleDollarSign,
+  Database,
+  Download,
+  FileSpreadsheet,
+  FileUp,
+  LayoutDashboard,
+  Layers,
+  LineChart as LineChartIcon,
+  Plus,
+  ReceiptText,
+  ShieldCheck,
+  Table2,
+  TrendingUp,
+  WalletCards
+} from "lucide-react";
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   Cell,
   ComposedChart,
   Legend,
@@ -17,7 +37,7 @@ import {
   YAxis
 } from "recharts";
 import { loadModel } from "@/lib/model";
-import { truncateSkuName } from "@/lib/charts";
+import { CHART_COLORS, CHART_SERIES, chartAxisProps, chartGridProps, chartTooltipProps, truncateSkuName } from "@/lib/charts";
 import { num, percent, rub } from "@/lib/format";
 
 export async function getServerSideProps() {
@@ -46,6 +66,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
   const activeSkuCount = products.filter((sku: any) => sku.isActive !== false).length;
   const missingRecipeCount = economics.filter((sku: any) => !sku.hasRecipe).length;
   const negativeEbitdaCount = economics.filter((sku: any) => sku.ebitdaPerItem < 0).length;
+  const hasInvestmentPaybackBase = summary.initialInvestment > 0 && summary.monthlyRevenue > 0 && summary.operatingCashflow > 0;
   const forecast = Array.from({ length: 12 }, (_, index) => ({
     month: index + 1,
     revenue: summary.monthlyRevenue,
@@ -54,12 +75,12 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
     cumulativeCashflow: cashflow[index]?.cumulativeCashflow ?? 0
   }));
   const expenseStructure = [
-    { name: "Food cost", value: summary.foodCostTotal },
-    { name: "Packaging", value: summary.packagingTotal },
-    { name: "Variable costs", value: summary.variableCosts },
-    { name: "Fixed costs", value: summary.fixedCosts },
-    { name: "Taxes", value: summary.taxPaid },
-    { name: "Depreciation", value: summary.monthlyDepreciation }
+    { name: "Себестоимость", value: summary.foodCostTotal },
+    { name: "Упаковка", value: summary.packagingTotal },
+    { name: "Переменные расходы", value: summary.variableCosts },
+    { name: "Постоянные расходы", value: summary.fixedCosts },
+    { name: "Налоги", value: summary.taxPaid },
+    { name: "Амортизация", value: summary.monthlyDepreciation }
   ].filter((item) => item.value > 0);
   const breakEven = Array.from({ length: 9 }, (_, index) => {
     const ordersPerDay = Math.max(0, Math.round((summary.breakEvenOrdersPerDay ?? 50) * (0.4 + index * 0.15)));
@@ -82,13 +103,13 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
   const franchisePayback = franchiseModel?.franchisee?.cumulativeCashflow24 ?? [];
   const hasFranchisePreview = franchisePayback.some((row: any) => row.openingInvestment > 0 || row.cumulativeCashflow !== 0);
   const completeness = [
-    { label: "SKU prices imported", done: products.filter((sku: any) => sku.salePrice > 0).length, total: products.length },
-    { label: "Recipes filled", done: economics.filter((sku: any) => sku.hasRecipe).length, total: economics.length },
-    { label: "Packaging filled", done: economics.filter((sku: any) => sku.hasPackaging).length, total: economics.length },
-    { label: "CAPEX filled", done: capex.filter((row: any) => row.amount > 0).length, total: Math.max(capex.length, 1) },
-    { label: "OPEX filled", done: opex.filter((row: any) => row.amount > 0).length, total: Math.max(opex.length, 1) },
-    { label: "Store Model filled", done: [store.workingDaysPerMonth, store.avgOrdersPerDay, store.avgItemsPerOrder, store.avgCheck].filter((value: number) => value > 0).length, total: 4 },
-    { label: "Franchise Mode filled", done: [
+    { label: "Цены SKU", done: products.filter((sku: any) => sku.salePrice > 0).length, total: products.length },
+    { label: "Рецептуры", done: economics.filter((sku: any) => sku.hasRecipe).length, total: economics.length },
+    { label: "Упаковка SKU", done: economics.filter((sku: any) => sku.hasPackaging).length, total: economics.length },
+    { label: "CAPEX", done: capex.filter((row: any) => row.amount > 0).length, total: Math.max(capex.length, 1) },
+    { label: "OPEX", done: opex.filter((row: any) => row.amount > 0).length, total: Math.max(opex.length, 1) },
+    { label: "Store Model", done: [store.workingDaysPerMonth, store.avgOrdersPerDay, store.avgItemsPerOrder, store.avgCheck].filter((value: number) => value > 0).length, total: 4 },
+    { label: "Franchise", done: [
       franchiseModel.franchise.franchiseWorkingDaysPerMonth,
       franchiseModel.franchise.franchiseAvgOrdersPerDay,
       franchiseModel.franchise.franchiseAvgItemsPerOrder,
@@ -101,8 +122,12 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
     <Shell>
       <div className="pageHeader">
         <div>
-          <h1>Franchise Model: Food Service Financial Model</h1>
-          <p>Все неизвестные финансовые значения остаются editable assumptions. Публичное меню импортируется отдельно от расчетов.</p>
+          <h1>Финансовая модель франшизы</h1>
+          <p>Расчёт экономики точки, SKU, CAPEX, OPEX, EBITDA, cashflow, Payback, ROI и сценариев масштабирования.</p>
+          <div className="badgeRow">
+            <span className="pill">Demo model</span>
+            <span className="pill">Editable assumptions</span>
+          </div>
         </div>
         <div className="actions">
           <Link className="button" href="/import"><FileUp size={16} /> Импорт</Link>
@@ -112,34 +137,34 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
       </div>
 
       <div className="metrics">
-        <Metric title="Monthly revenue" value={rub(summary.monthlyRevenue)} />
-        <Metric title="Gross profit" value={rub(summary.grossProfit)} />
-        <Metric title="EBITDA" value={rub(summary.ebitda)} />
-        <Metric title="EBITDA margin" value={percent(summary.ebitdaMargin)} />
-        <Metric title="Operating cashflow" value={rub(summary.operatingCashflow)} />
-        <Metric title="Opening investment" value={rub(summary.initialInvestment)} />
-        <Metric title="Payback" value={summary.paybackMonth ? `${summary.paybackMonth} мес.` : "n/a"} />
-        <Metric title="Break-even / день" value={summary.breakEvenOrdersPerDay == null ? "n/a" : `${Math.ceil(summary.breakEvenOrdersPerDay)} заказов`} />
-        <Metric title="Active SKU count" value={num(activeSkuCount, 0)} />
-        <Metric title="SKU with missing recipe" value={num(missingRecipeCount, 0)} />
-        <Metric title="SKU with negative EBITDA" value={num(negativeEbitdaCount, 0)} />
-        <Metric title="ROI" value={summary.roi == null ? "n/a" : percent(summary.roi)} />
+        <Metric title="Выручка / мес" value={rub(summary.monthlyRevenue)} note="Текущая Store Model" icon={<CircleDollarSign size={18} />} />
+        <Metric title="Валовая прибыль" value={rub(summary.grossProfit)} note="После себестоимости и упаковки" icon={<TrendingUp size={18} />} />
+        <Metric title="EBITDA" value={rub(summary.ebitda)} note="До налогов и cashflow adjustments" icon={<BarChart3 size={18} />} />
+        <Metric title="Маржа EBITDA" value={percent(summary.ebitdaMargin)} note="EBITDA / выручка" icon={<LineChartIcon size={18} />} />
+        <Metric title="Операционный cashflow" value={rub(summary.operatingCashflow)} note="После налогов и выплат" icon={<WalletCards size={18} />} />
+        <Metric title="Инвестиции на открытие" value={rub(summary.initialInvestment)} note="CAPEX до старта" icon={<ReceiptText size={18} />} />
+        <Metric title="Payback" value={hasInvestmentPaybackBase && summary.paybackMonth ? `${summary.paybackMonth} мес.` : "n/a"} note="Не считается при пустой модели" icon={<Calculator size={18} />} />
+        <Metric title="Break-even / день" value={summary.monthlyRevenue > 0 && summary.breakEvenOrdersPerDay != null ? `${Math.ceil(summary.breakEvenOrdersPerDay)} заказов` : "n/a"} note="Заказы для выхода в ноль" icon={<ShieldCheck size={18} />} />
+        <Metric title="Активные SKU" value={num(activeSkuCount, 0)} note="Включены в меню" icon={<Table2 size={18} />} />
+        <Metric title="SKU без рецептуры" value={num(missingRecipeCount, 0)} note="Нужно заполнить состав" icon={<Layers size={18} />} />
+        <Metric title="SKU с отрицательной EBITDA" value={num(negativeEbitdaCount, 0)} note="Требуют проверки цены или затрат" icon={<AlertTriangle size={18} />} />
+        <Metric title="ROI" value={hasInvestmentPaybackBase && summary.roi != null ? percent(summary.roi) : "n/a"} note="Не считается без CAPEX и cashflow" icon={<Database size={18} />} />
       </div>
 
       <section className="band quickActions">
         <div className="sectionHead">
-          <h2>Quick Actions</h2>
+          <h2>Быстрые действия</h2>
           <span>Самые частые переходы для заполнения модели</span>
         </div>
         <div className="actions">
           <Link className="button primary" href="/menu"><Plus size={16} /> Добавить SKU</Link>
-          <Link className="button" href="/ingredients"><Wheat size={16} /> Добавить ингредиент</Link>
-          <Link className="button" href="/store">Заполнить Store Model</Link>
-          <Link className="button" href="/capex"><PackagePlus size={16} /> Добавить CAPEX</Link>
+          <Link className="button" href="/ingredients"><Layers size={16} /> Добавить ингредиент</Link>
+          <Link className="button" href="/store-model"><Calculator size={16} /> Заполнить Store Model</Link>
+          <Link className="button" href="/capex"><ReceiptText size={16} /> Добавить CAPEX</Link>
           <Link className="button" href="/opex">Добавить OPEX</Link>
-          <Link className="button" href="/franchise">Открыть Franchise Mode</Link>
+          <Link className="button" href="/franchise">Открыть Franchise</Link>
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a className="button" href="/api/export/full"><Download size={16} /> Export XLSX</a>
+          <a className="button" href="/api/export/full"><Download size={16} /> Экспорт XLSX</a>
         </div>
       </section>
 
@@ -151,13 +176,14 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
         <div className="chart">
           <ResponsiveContainer width="100%" height={260}>
             <ComposedChart data={forecast} margin={{ top: 16, right: 24, bottom: 8, left: 12 }}>
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => compactRub(Number(value))} width={82} />
-              <Tooltip formatter={(value: number) => rub(value)} />
+              <CartesianGrid {...chartGridProps} />
+              <XAxis dataKey="month" {...chartAxisProps} tickFormatter={(value) => `${value}`} />
+              <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
+              <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} />
               <Legend />
-              <Bar dataKey="revenue" fill="#D9B88F" name="Revenue" />
-              <Line type="monotone" dataKey="ebitda" stroke="#6F7F52" strokeWidth={2} dot={false} name="EBITDA" />
-              <Line type="monotone" dataKey="cashflow" stroke="#B23A2E" strokeWidth={2} dot={false} name="Cashflow" />
+              <Bar dataKey="revenue" fill={CHART_COLORS.gold} name="Выручка" radius={[8, 8, 0, 0]} />
+              <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.olive} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.goldSoft, stroke: CHART_COLORS.surface }} name="EBITDA" />
+              <Line type="monotone" dataKey="cashflow" stroke={CHART_COLORS.copper} strokeWidth={3} dot={false} activeDot={{ r: 5, fill: CHART_COLORS.goldSoft, stroke: CHART_COLORS.surface }} name="Cashflow" />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
@@ -173,13 +199,13 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
                   <Pie data={expenseStructure} dataKey="value" nameKey="name" innerRadius={54} outerRadius={92}>
-                    {expenseStructure.map((_: any, index: number) => <Cell key={index} fill={["#7A4E2D", "#D9B88F", "#B23A2E", "#4B2F1D", "#C9822B", "#6F7F52"][index % 6]} />)}
+                    {expenseStructure.map((_: any, index: number) => <Cell key={index} fill={CHART_SERIES[index % CHART_SERIES.length]} />)}
                   </Pie>
-                  <Tooltip formatter={(value: number) => rub(value)} />
+                  <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <div className="emptyState">Заполните SKU, OPEX и Tax settings, чтобы увидеть структуру расходов.</div>}
+            ) : <div className="emptyState">Заполните SKU, OPEX и налоговые assumptions, чтобы увидеть структуру расходов.</div>}
           </div>
         </section>
         <section className="band">
@@ -187,11 +213,12 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           <div className="chart">
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={breakEven} margin={{ top: 16, right: 24, bottom: 8, left: 12 }}>
-                <XAxis dataKey="ordersPerDay" />
-                <YAxis tickFormatter={(value) => compactRub(Number(value))} width={82} />
-                <Tooltip formatter={(value: number) => rub(value)} />
-                <ReferenceLine y={0} stroke="#B23A2E" />
-                <Line type="monotone" dataKey="ebitda" stroke="#7A4E2D" strokeWidth={2} dot />
+                <CartesianGrid {...chartGridProps} />
+                <XAxis dataKey="ordersPerDay" {...chartAxisProps} />
+                <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
+                <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} />
+                <ReferenceLine y={0} stroke={CHART_COLORS.red} />
+                <Line type="monotone" dataKey="ebitda" stroke={CHART_COLORS.gold} strokeWidth={3} dot={{ r: 3, fill: CHART_COLORS.goldSoft }} activeDot={{ r: 5 }} name="EBITDA" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -200,20 +227,21 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
 
       <div className="twoCol">
         <section className="band">
-          <h2>SKU economics chart</h2>
+          <h2>Unit Economics SKU</h2>
           {!hasSkuCosts ? (
-            <div className="emptyState">Заполните рецептуры SKU, чтобы увидеть рейтинг маржинальности.</div>
+            <div className="emptyState">Заполните рецептуры и закупочные цены, чтобы увидеть рейтинг маржинальности.</div>
           ) : (
             <>
               {economics.length > 10 && <Link className="subtleLink" href="/menu">Показать все в таблице</Link>}
               <div className="chart" style={{ height: skuChartHeight }}>
                 <ResponsiveContainer width="100%" height={skuChartHeight}>
                   <BarChart data={skuRanking} layout="vertical" margin={{ left: 18, right: 18 }}>
-                    <XAxis type="number" tick={{ fontSize: 12 }} tickFormatter={(value) => rub(Number(value))} />
-                    <YAxis type="category" dataKey="shortName" width={220} tick={{ fontSize: 12 }} />
-                    <Tooltip formatter={(value: number) => rub(value)} labelFormatter={(_, payload: any) => payload?.[0]?.payload?.fullName ?? ""} />
-                    <ReferenceLine x={0} stroke="#4B2F1D" />
-                    <Bar dataKey="ebitdaPerItem" name="EBITDA / item" fill="#6F7F52" />
+                    <CartesianGrid {...chartGridProps} />
+                    <XAxis type="number" {...chartAxisProps} tickFormatter={(value) => rub(Number(value))} />
+                    <YAxis type="category" dataKey="shortName" width={220} {...chartAxisProps} />
+                    <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(_, payload: any) => payload?.[0]?.payload?.fullName ?? ""} />
+                    <ReferenceLine x={0} stroke={CHART_COLORS.grid} />
+                    <Bar dataKey="ebitdaPerItem" name="EBITDA / SKU" fill={CHART_COLORS.olive} radius={[0, 8, 8, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -221,15 +249,16 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           )}
         </section>
         <section className="band">
-          <h2>Sensitivity tornado</h2>
+          <h2>Sensitivity: влияние на EBITDA</h2>
           <div className="chart" style={{ height: tornadoHeight }}>
             <ResponsiveContainer width="100%" height={tornadoHeight}>
               <BarChart data={tornado} layout="vertical" margin={{ left: 18, right: 18 }}>
-                <XAxis type="number" tick={{ fontSize: 12 }} tickFormatter={(value) => compactRub(Number(value))} />
-                <YAxis type="category" dataKey="parameter" width={210} tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(value: number) => rub(value)} labelFormatter={(_, payload: any) => payload?.[0]?.payload?.fullName ?? ""} />
+                <CartesianGrid {...chartGridProps} />
+                <XAxis type="number" {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} />
+                <YAxis type="category" dataKey="parameter" width={210} {...chartAxisProps} />
+                <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(_, payload: any) => payload?.[0]?.payload?.fullName ?? ""} />
                 <Bar dataKey="impact">
-                  {tornado.map((row: any, index: number) => <Cell key={index} fill={row.impact < 0 ? "#B23A2E" : "#6F7F52"} />)}
+                  {tornado.map((row: any, index: number) => <Cell key={index} fill={row.impact < 0 ? CHART_COLORS.red : CHART_COLORS.olive} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -239,16 +268,16 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
 
       <div className="twoCol">
         <section className="band">
-          <h2>Franchise payback preview</h2>
+          <h2>Payback Franchise</h2>
           {hasFranchisePreview ? (
             <div className="chart">
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={franchisePayback} margin={{ top: 16, right: 24, bottom: 8, left: 12 }}>
                   <XAxis dataKey="month" tickFormatter={(value) => `M${value}`} />
-                  <YAxis tickFormatter={(value) => compactRub(Number(value))} width={82} />
-                  <Tooltip formatter={(value: number) => rub(value)} labelFormatter={(label) => `Month ${label}`} />
-                  <ReferenceLine y={0} stroke="#B23A2E" strokeDasharray="4 4" />
-                  <Line type="monotone" dataKey="cumulativeCashflow" stroke="#7A4E2D" strokeWidth={2} dot={false} />
+                  <YAxis {...chartAxisProps} tickFormatter={(value) => compactRub(Number(value))} width={82} />
+                  <Tooltip {...chartTooltipProps} formatter={(value: number) => rub(value)} labelFormatter={(label) => `Месяц ${label}`} />
+                  <ReferenceLine y={0} stroke={CHART_COLORS.red} strokeDasharray="4 4" />
+                  <Line type="monotone" dataKey="cumulativeCashflow" name="Накопленный cashflow" stroke={CHART_COLORS.gold} strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -257,7 +286,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
           )}
         </section>
         <section className="band">
-          <h2>Data completeness</h2>
+          <h2>Заполненность модели</h2>
           <div className="progressGrid">
             {completeness.map((item) => <ProgressCard key={item.label} {...item} />)}
           </div>
@@ -266,18 +295,18 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
 
       <div className="twoCol">
         <section className="band">
-          <h2>Top profitable SKU</h2>
+          <h2>Самые прибыльные SKU</h2>
           <SimpleSkuList rows={top} />
         </section>
         <section className="band">
-          <h2>Weak SKU by margin</h2>
+          <h2>Слабые SKU по марже</h2>
           <SimpleSkuList rows={weak} />
         </section>
       </div>
 
       <section className="band">
         <div className="sectionHead">
-          <h2>Checks</h2>
+          <h2>Аудит модели</h2>
           <Link href="/checks">Открыть все</Link>
         </div>
         <div className="checks">
@@ -287,7 +316,7 @@ export default function Dashboard({ summary, checks, diagnostics, economics, sen
               <span>{check.message}</span>
             </div>
           ))}
-          {!checks.length && <p>Критичных проверок нет.</p>}
+          {!checks.length && <p>Критичных проверок нет. Модель выглядит готовой для демо-сценария.</p>}
         </div>
       </section>
     </Shell>
@@ -303,19 +332,19 @@ function Diagnostics({ diagnostics }: { diagnostics: any[] }) {
   );
 }
 
-export function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({ children }: { children: ReactNode }) {
   return (
     <div>
       <nav className="nav">
-        <Link href="/" className="brand"><Gauge size={18} /> Franchise Model</Link>
+        <Link href="/" className="brand"><LayoutDashboard size={18} /> Franchise Model</Link>
         <Link href="/menu"><Table2 size={16} /> SKU</Link>
-        <Link href="/ingredients"><Wheat size={16} /> Ingredients</Link>
-        <Link href="/store">Store Model</Link>
+        <Link href="/ingredients"><Layers size={16} /> Ингредиенты</Link>
+        <Link href="/store-model"><Calculator size={16} /> Store Model</Link>
         <Link href="/capex">CAPEX</Link>
         <Link href="/opex">OPEX</Link>
-        <Link href="/sensitivity">Sensitivity</Link>
-        <Link href="/franchise">Franchise</Link>
-        <Link href="/checks">Checks</Link>
+        <Link href="/sensitivity"><LineChartIcon size={16} /> Sensitivity</Link>
+        <Link href="/franchise"><FileSpreadsheet size={16} /> Franchise</Link>
+        <Link href="/checks"><ShieldCheck size={16} /> Аудит</Link>
       </nav>
       <main className="main">{children}</main>
     </div>
@@ -323,11 +352,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
 }
 
 
-function Metric({ title, value }: { title: string; value: string }) {
+function Metric({ title, value, note, icon }: { title: string; value: string; note?: string; icon?: ReactNode }) {
   return (
     <div className="metric">
-      <span>{title}</span>
+      <span>{icon}{title}</span>
       <strong>{value}</strong>
+      {note && <em>{note}</em>}
     </div>
   );
 }
@@ -343,7 +373,7 @@ function SimpleSkuList({ rows }: { rows: any[] }) {
             <td>{percent(row.ebitdaMarginPercent)}</td>
           </tr>
         ))}
-        {!rows.length && <tr><td>Нет SKU</td></tr>}
+        {!rows.length && <tr><td>Добавьте SKU, чтобы построить Unit Economics.</td></tr>}
       </tbody>
     </table>
   );

@@ -3,12 +3,9 @@ import * as XLSX from "xlsx";
 import { Shell } from "@/pages/index";
 
 const templates = [
-  "menu_template.csv",
-  "recipes_template.csv",
-  "ingredients_template.csv",
-  "capex_template.csv",
-  "opex_template.csv",
-  "tax_settings_template.csv"
+  { kind: "menu", label: "Меню", file: "menu_template.csv" },
+  { kind: "ingredients", label: "Ингредиенты", file: "ingredients_template.csv" },
+  { kind: "recipes", label: "Рецептуры", file: "recipes_template.csv" }
 ];
 
 export default function ImportPage() {
@@ -31,21 +28,21 @@ export default function ImportPage() {
     <Shell>
       <div className="pageHeader">
         <div>
-          <h1>Import CSV/XLSX</h1>
-          <p>Загрузите меню, рецептуры, ингредиенты, CAPEX, OPEX и налоги. Все импортируемые финансовые поля остаются редактируемыми assumptions, если не пришли из публичного меню.</p>
+          <h1>Импорт CSV/XLSX</h1>
+          <p>Загрузите меню, ингредиенты и рецептуры. CAPEX, OPEX и налоги лучше заполнять вручную в соответствующих разделах, чтобы assumptions оставались прозрачными.</p>
         </div>
       </div>
       <section className="band">
         <div className="gridForm">
-          {["menu", "recipes", "ingredients", "capex", "opex", "tax"].map((kind) => (
-            <label key={kind}>{kind}<input type="file" accept=".csv,.xlsx,.xls" onChange={(e) => upload(kind, e.target.files?.[0])} /></label>
+          {templates.map((item) => (
+            <label key={item.kind}>{item.label}<input type="file" accept=".csv,.xlsx,.xls" onChange={(e) => upload(item.kind, e.target.files?.[0])} /></label>
           ))}
         </div>
         {message && <p><strong>{message}</strong></p>}
       </section>
       <section className="band">
-        <h2>CSV templates</h2>
-        <table><tbody>{templates.map((name) => <tr key={name}><td>{name}</td><td><a href={`/templates/${name}`}>download</a></td></tr>)}</tbody></table>
+        <h2>CSV-шаблоны</h2>
+        <table><tbody>{templates.map((item) => <tr key={item.file}><td>{item.label}</td><td>{item.file}</td><td><a href={`/templates/${item.file}`}>Скачать</a></td></tr>)}</tbody></table>
       </section>
     </Shell>
   );

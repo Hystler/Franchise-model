@@ -80,8 +80,8 @@ export default function MenuPage({ economics, products, categories }: any) {
     <Shell>
       <div className="pageHeader">
         <div>
-          <h1>SKU constructor</h1>
-          <p>Ручное управление меню, ценами, статусами и unit-economics. Себестоимость считается из рецептур и упаковки в карточке SKU.</p>
+          <h1>Конструктор SKU</h1>
+          <p>Ручное управление меню, ценами, статусами и Unit Economics. Себестоимость считается из рецептур и упаковки в карточке SKU.</p>
         </div>
         <div className="actions">
           <button className="primary" onClick={openNew}><Plus size={16} /> Добавить SKU</button>
@@ -91,38 +91,38 @@ export default function MenuPage({ economics, products, categories }: any) {
 
       <section className="band">
         <div className="sectionHead">
-          <h2>SKU table</h2>
+          <h2>Таблица SKU</h2>
           <div className="segmented">
-            <button className={mode === "basic" ? "active" : ""} onClick={() => setMode("basic")}>Basic</button>
-            <button className={mode === "unit" ? "active" : ""} onClick={() => setMode("unit")}>Unit economics</button>
-            <button className={mode === "full" ? "active" : ""} onClick={() => setMode("full")}>Full finance</button>
+            <button className={mode === "basic" ? "active" : ""} onClick={() => setMode("basic")}>Базовый</button>
+            <button className={mode === "unit" ? "active" : ""} onClick={() => setMode("unit")}>Unit Economics</button>
+            <button className={mode === "full" ? "active" : ""} onClick={() => setMode("full")}>Полная экономика</button>
           </div>
         </div>
         <div className="tableScroll">
           <table className="skuTable">
             <thead>
               <tr>
-                <th>Category</th>
+                <th>Категория</th>
                 <th className="stickyCol">SKU</th>
-                <th>Price, ₽</th>
-                {(mode === "basic" || mode === "unit" || mode === "full") && <th>Ingredient cost</th>}
-                {(mode === "full") && <th>Ingredient %</th>}
-                {(mode === "basic" || mode === "unit" || mode === "full") && <th>Packaging</th>}
-                {(mode === "unit" || mode === "full") && <th>Variable cost</th>}
-                {mode === "full" && <th>Taxes/item</th>}
-                {mode === "full" && <th>Delivery/commission</th>}
-                {mode === "full" && <th>Marketing/item</th>}
-                {mode === "full" && <th>Depreciation/item</th>}
-                {mode === "full" && <th>Fixed allocation</th>}
-                {mode === "full" && <th>Total cost/item</th>}
-                {(mode === "basic" || mode === "full") && <th>Gross profit</th>}
-                {(mode === "basic" || mode === "full") && <th>Gross margin</th>}
+                <th>Цена, ₽</th>
+                {(mode === "basic" || mode === "unit" || mode === "full") && <th>Себестоимость</th>}
+                {(mode === "full") && <th>Себестоимость, %</th>}
+                {(mode === "basic" || mode === "unit" || mode === "full") && <th>Упаковка</th>}
+                {(mode === "unit" || mode === "full") && <th>Переменные расходы</th>}
+                {mode === "full" && <th>Налоги/SKU</th>}
+                {mode === "full" && <th>Доставка/комиссии</th>}
+                {mode === "full" && <th>Маркетинг/SKU</th>}
+                {mode === "full" && <th>Амортизация/SKU</th>}
+                {mode === "full" && <th>Распределённый OPEX</th>}
+                {mode === "full" && <th>Полная себестоимость</th>}
+                {(mode === "basic" || mode === "full") && <th>Валовая прибыль</th>}
+                {(mode === "basic" || mode === "full") && <th>Валовая маржа</th>}
                 {(mode === "unit" || mode === "full") && <th>Contribution</th>}
-                {mode === "full" && <th>Contribution %</th>}
-                {(mode === "unit" || mode === "full") && <th>EBITDA/item</th>}
-                {(mode === "unit" || mode === "full") && <th>EBITDA %</th>}
-                <th>Status</th>
-                <th className="stickyAction">Actions</th>
+                {mode === "full" && <th>Маржа contribution</th>}
+                {(mode === "unit" || mode === "full") && <th>EBITDA/SKU</th>}
+                {(mode === "unit" || mode === "full") && <th>Маржа EBITDA</th>}
+                <th>Статус</th>
+                <th className="stickyAction">Действия</th>
               </tr>
             </thead>
             <tbody>
@@ -158,7 +158,7 @@ export default function MenuPage({ economics, products, categories }: any) {
                   {(mode === "unit" || mode === "full") && <MoneyCell value={row.ebitdaPerItem} />}
                   {(mode === "unit" || mode === "full") && <td className={row.ebitdaMarginPercent < 0 ? "negative" : "positive"}>{percent(row.ebitdaMarginPercent)}</td>}
                   <td>
-                    <span className={`status ${statusClass(row.status)}`} title={row.warnings?.join("\n")}>{row.status}</span>
+                    <span className={`status ${statusClass(row.status)}`} title={row.warnings?.join("\n")}>{statusLabel(row.status)}</span>
                   </td>
                   <td className="stickyAction">
                     <div className="iconActions">
@@ -188,10 +188,10 @@ export default function MenuPage({ economics, products, categories }: any) {
                 <label>Категория<input list="categories" value={editor.category} onChange={(e) => setEditor({ ...editor, category: e.target.value })} /></label>
                 <datalist id="categories">{categories.map((item: string) => <option key={item} value={item} />)}</datalist>
                 <label>Цена, ₽<input type="number" min={0} step={10} value={editor.salePrice} onChange={(e) => setEditor({ ...editor, salePrice: Number(e.target.value) })} /></label>
-                <label>Source<select value={editor.source} onChange={(e) => setEditor({ ...editor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED_MENU</option><option>ASSUMPTION</option></select></label>
+                <label>Источник<select value={editor.source} onChange={(e) => setEditor({ ...editor, source: e.target.value })}><option>MANUAL</option><option>IMPORTED_MENU</option><option>ASSUMPTION</option></select></label>
                 <label className="wide">Описание<textarea value={editor.description ?? ""} onChange={(e) => setEditor({ ...editor, description: e.target.value })} /></label>
-                <label>Image URL<input value={editor.imageUrl ?? ""} onChange={(e) => setEditor({ ...editor, imageUrl: e.target.value })} /></label>
-                <label>Product URL<input value={editor.productUrl ?? ""} onChange={(e) => setEditor({ ...editor, productUrl: e.target.value })} /></label>
+                <label>URL изображения<input value={editor.imageUrl ?? ""} onChange={(e) => setEditor({ ...editor, imageUrl: e.target.value })} /></label>
+                <label>URL продукта<input value={editor.productUrl ?? ""} onChange={(e) => setEditor({ ...editor, productUrl: e.target.value })} /></label>
                 <label className="checkLine"><input type="checkbox" checked={editor.isActive} onChange={(e) => setEditor({ ...editor, isActive: e.target.checked })} /> Активен</label>
                 <div className="rowActions wide">
                   <button onClick={() => setEditor(null)}>Отмена</button>
@@ -222,4 +222,18 @@ function MoneyCell({ value }: { value: number }) {
 
 export function statusClass(status: string) {
   return status.replace(/\s+/g, "-");
+}
+
+export function statusLabel(status: string) {
+  const normalized = status.toLowerCase();
+  if (normalized === "ok") return "готово";
+  if (normalized.includes("missing recipe")) return "нет рецептуры";
+  if (normalized.includes("missing packaging")) return "нет упаковки";
+  if (normalized.includes("negative contribution")) return "отрицательный contribution";
+  if (normalized.includes("negative")) return "отрицательная экономика";
+  if (normalized.includes("high food cost")) return "высокая себестоимость";
+  if (normalized.includes("low margin")) return "низкая маржа";
+  if (normalized === "warning") return "требует внимания";
+  if (normalized === "good") return "хорошо";
+  return status;
 }

@@ -34,19 +34,19 @@ export default function OpexPage({ rows: initialRows }: any) {
 
   return (
     <Shell>
-      <div className="pageHeader"><div><h1>OPEX</h1><p>Ежемесячные расходы: fixed или variable, с драйвером revenue/orders/items/fixed.</p></div></div>
+      <div className="pageHeader"><div><h1>OPEX</h1><p>Ежемесячные расходы: постоянные или переменные, с драйвером выручки, заказов, SKU или фиксированной ставки.</p></div></div>
       <form className="band gridForm" method="post" action="/api/opex">
         <Input name="category" label="Статья" help="Например: аренда, ФОТ, коммунальные" />
         <Input name="amount" label="Сумма или ставка" help="₽ / мес, ₽ / заказ, ₽ / SKU или % для LINKED_TO_REVENUE" />
-        <label>Behavior<select name="behavior" defaultValue="FIXED"><option>FIXED</option><option>VARIABLE</option></select></label>
-        <label>Driver<select name="driver" defaultValue="FIXED"><option>FIXED</option><option>LINKED_TO_REVENUE</option><option>LINKED_TO_ORDERS</option><option>LINKED_TO_ITEMS</option></select></label>
-        <label className="wide">Comment<input name="comment" placeholder="Комментарий" /></label>
+        <label>Тип<select name="behavior" defaultValue="FIXED"><option value="FIXED">Постоянный</option><option value="VARIABLE">Переменный</option></select></label>
+        <label>Драйвер<select name="driver" defaultValue="FIXED"><option value="FIXED">Фиксированный</option><option value="LINKED_TO_REVENUE">От выручки</option><option value="LINKED_TO_ORDERS">От заказов</option><option value="LINKED_TO_ITEMS">От SKU</option></select></label>
+        <label className="wide">Комментарий<input name="comment" placeholder="Комментарий" /></label>
         <button className="primary" type="submit">Добавить OPEX</button>
       </form>
       <section className="band">
-        <h2>Fixed costs: {rub(fixedCosts)}</h2>
+        <h2>Постоянные расходы: {rub(fixedCosts)}</h2>
         <table>
-          <thead><tr><th>Статья</th><th>Сумма/ставка</th><th>Behavior</th><th>Driver</th><th>Comment</th><th>Действия</th></tr></thead>
+          <thead><tr><th>Статья</th><th>Сумма/ставка</th><th>Тип</th><th>Драйвер</th><th>Комментарий</th><th>Действия</th></tr></thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
@@ -54,8 +54,8 @@ export default function OpexPage({ rows: initialRows }: any) {
                   <form className="rowEditor opexEditor" onSubmit={(event) => { event.preventDefault(); update(row.id, event.currentTarget); }}>
                     <input name="category" defaultValue={row.category} aria-label="Статья" />
                     <input name="amount" defaultValue={row.amount} type="number" min="0" step={row.driver === "LINKED_TO_REVENUE" ? "1" : "1000"} aria-label="Сумма" />
-                    <select name="behavior" defaultValue={row.behavior}><option>FIXED</option><option>VARIABLE</option></select>
-                    <select name="driver" defaultValue={row.driver}><option>FIXED</option><option>LINKED_TO_REVENUE</option><option>LINKED_TO_ORDERS</option><option>LINKED_TO_ITEMS</option></select>
+                    <select name="behavior" defaultValue={row.behavior}><option value="FIXED">Постоянный</option><option value="VARIABLE">Переменный</option></select>
+                    <select name="driver" defaultValue={row.driver}><option value="FIXED">Фиксированный</option><option value="LINKED_TO_REVENUE">От выручки</option><option value="LINKED_TO_ORDERS">От заказов</option><option value="LINKED_TO_ITEMS">От SKU</option></select>
                     <input name="comment" defaultValue={row.comment ?? ""} aria-label="Комментарий" />
                     <div className="rowActions">
                       <button type="submit">Сохранить</button>
@@ -65,7 +65,7 @@ export default function OpexPage({ rows: initialRows }: any) {
                 </td>
               </tr>
             ))}
-            {!rows.length && <tr><td colSpan={6}>OPEX пуст. Импортируйте шаблон или добавьте строки вручную.</td></tr>}
+            {!rows.length && <tr><td colSpan={6}>Заполните OPEX, чтобы увидеть EBITDA, операционный cashflow и Break-even.</td></tr>}
           </tbody>
         </table>
       </section>

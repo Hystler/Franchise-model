@@ -420,7 +420,7 @@ export function calculateFranchiseFinancialModel(input: {
     franchise,
     status,
     missingDataWarning: missingDataWarnings.length
-      ? "Для точного расчета заполните franchise inputs, Franchise OPEX, CAPEX и SKU себестоимость."
+      ? "Для точного расчета заполните вводные Franchise, OPEX Franchise, CAPEX и себестоимость SKU."
       : null,
     missingDataWarnings,
     franchisee: base.franchisee,
@@ -670,23 +670,23 @@ function buildFranchiseChecks(
   const month12 = f.cumulativeCashflow36.find((row) => row.month === 12) ?? f.cumulativeCashflow36.find((row) => row.month === 1);
   const feeRatio = safeDiv(f.royalty + f.marketingFee, f.revenue);
 
-  if (franchise.franchiseAvgCheck <= 0) checks.push({ severity: "critical", code: "FRANCHISE_AVG_CHECK_ZERO", message: "franchiseAvgCheck <= 0" });
-  if (franchise.franchiseAvgOrdersPerDay <= 0) checks.push({ severity: "critical", code: "FRANCHISE_ORDERS_ZERO", message: "franchiseAvgOrdersPerDay <= 0" });
-  if (franchise.franchiseAvgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "FRANCHISE_ITEMS_ZERO", message: "franchiseAvgItemsPerOrder <= 0" });
-  if (f.openingInvestment <= 0) checks.push({ severity: "critical", code: "OPENING_INVESTMENT_ZERO", message: "openingInvestment <= 0" });
+  if (franchise.franchiseAvgCheck <= 0) checks.push({ severity: "critical", code: "FRANCHISE_AVG_CHECK_ZERO", message: "Средний чек франчайзи <= 0" });
+  if (franchise.franchiseAvgOrdersPerDay <= 0) checks.push({ severity: "critical", code: "FRANCHISE_ORDERS_ZERO", message: "Заказы / день франчайзи <= 0" });
+  if (franchise.franchiseAvgItemsPerOrder <= 0) checks.push({ severity: "critical", code: "FRANCHISE_ITEMS_ZERO", message: "SKU / заказ франчайзи <= 0" });
+  if (f.openingInvestment <= 0) checks.push({ severity: "critical", code: "OPENING_INVESTMENT_ZERO", message: "Инвестиции на открытие <= 0" });
   if (f.paybackMonth == null || f.paybackMonth > 36) checks.push({ severity: "critical", code: "PAYBACK_OVER_36", message: "Payback не достигается за 36 месяцев" });
-  if ((month12?.ebitdaAfterFees ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_FRANCHISEE_EBITDA", message: "EBITDA after fees < 0 в month 12" });
-  if ((month12?.netOperatingCashflow ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_MONTH_12_CF", message: "Net cashflow < 0 в month 12" });
-  if (feeRatio > 0.15) checks.push({ severity: "critical", code: "FRANCHISE_FEES_OVER_15", message: "Royalty + marketing fee > 15%" });
-  if (franchise.monthlyGrowthRatePercent > 10) checks.push({ severity: "warning", code: "GROWTH_OVER_10", message: "Trend growth > 10% в месяц" });
-  if (franchise.monthlyDeclineRatePercent > 10) checks.push({ severity: "warning", code: "DECLINE_OVER_10", message: "Trend decline > 10% в месяц" });
-  if (franchise.rampUpStartPercent < 40) checks.push({ severity: "warning", code: "RAMP_START_BELOW_40", message: "rampUpStartPercent < 40%" });
+  if ((month12?.ebitdaAfterFees ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_FRANCHISEE_EBITDA", message: "EBITDA после fees < 0 в месяце 12" });
+  if ((month12?.netOperatingCashflow ?? 0) < 0) checks.push({ severity: "critical", code: "NEGATIVE_MONTH_12_CF", message: "Net cashflow < 0 в месяце 12" });
+  if (feeRatio > 0.15) checks.push({ severity: "critical", code: "FRANCHISE_FEES_OVER_15", message: "Royalty + маркетинговый сбор > 15%" });
+  if (franchise.monthlyGrowthRatePercent > 10) checks.push({ severity: "warning", code: "GROWTH_OVER_10", message: "Рост тренда > 10% в месяц" });
+  if (franchise.monthlyDeclineRatePercent > 10) checks.push({ severity: "warning", code: "DECLINE_OVER_10", message: "Снижение тренда > 10% в месяц" });
+  if (franchise.rampUpStartPercent < 40) checks.push({ severity: "warning", code: "RAMP_START_BELOW_40", message: "Старт ramp-up < 40%" });
   if (f.paybackMonth != null && f.paybackMonth > 24) checks.push({ severity: "warning", code: "PAYBACK_OVER_24", message: "Payback > 24 месяцев" });
-  if (f.annualROI != null && f.annualROI < 0.3) checks.push({ severity: "warning", code: "ROI_BELOW_30", message: "Annual ROI < 30%" });
-  if (f.revenueMonth12 < f.revenueMonth1) checks.push({ severity: "warning", code: "REVENUE_12_BELOW_1", message: "Revenue month 12 ниже month 1" });
-  if (franchise.franchiseInputsCopiedFromStore) checks.push({ severity: "warning", code: "COPIED_STORE_VALUES", message: "Franchise model uses copied Store Model values: проверьте, подходят ли эти данные для новой точки" });
-  if (f.fixedCosts.total <= 0) checks.push({ severity: "warning", code: "FRANCHISE_OPEX_MISSING", message: "Missing franchise OPEX" });
-  if (!capex.length || f.capexInvestment <= 0) checks.push({ severity: "warning", code: "FRANCHISE_CAPEX_MISSING", message: "Missing franchise CAPEX / opening investment" });
+  if (f.annualROI != null && f.annualROI < 0.3) checks.push({ severity: "warning", code: "ROI_BELOW_30", message: "Годовой ROI < 30%" });
+  if (f.revenueMonth12 < f.revenueMonth1) checks.push({ severity: "warning", code: "REVENUE_12_BELOW_1", message: "Выручка месяца 12 ниже месяца 1" });
+  if (franchise.franchiseInputsCopiedFromStore) checks.push({ severity: "warning", code: "COPIED_STORE_VALUES", message: "Franchise использует скопированные значения Store Model: проверьте, подходят ли эти данные для новой точки" });
+  if (f.fixedCosts.total <= 0) checks.push({ severity: "warning", code: "FRANCHISE_OPEX_MISSING", message: "OPEX Franchise не заполнен" });
+  if (!capex.length || f.capexInvestment <= 0) checks.push({ severity: "warning", code: "FRANCHISE_CAPEX_MISSING", message: "CAPEX Franchise / инвестиции на открытие не заполнены" });
   if (products.length && f.foodCost === 0) checks.push({ severity: "warning", code: "SKU_COST_MISSING", message: "SKU себестоимость отсутствует" });
   return checks;
 }
@@ -717,7 +717,7 @@ function buildMissingDataWarnings(
 ) {
   const warnings: string[] = [];
   if (franchise.franchiseAvgCheck <= 0 || franchise.franchiseAvgOrdersPerDay <= 0 || franchise.franchiseAvgItemsPerOrder <= 0) {
-    warnings.push("Franchisee Store Inputs не заполнены.");
+    warnings.push("Store Model франчайзи не заполнен.");
   }
   if (!capex.length) warnings.push("CAPEX не заполнен или равен 0.");
   if (fixedCostBreakdown(franchise).total <= 0) warnings.push("Franchise OPEX не заполнен.");
