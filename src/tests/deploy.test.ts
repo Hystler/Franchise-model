@@ -15,7 +15,10 @@ const { mockLoadModel, mockPrisma } = vi.hoisted(() => ({
   }
 }));
 
-vi.mock("@/lib/model", () => ({ loadModel: mockLoadModel }));
+vi.mock("@/lib/model", () => ({
+  loadModel: mockLoadModel,
+  withDbRetry: (operation: () => Promise<unknown>) => operation()
+}));
 vi.mock("@/lib/db", () => ({ prisma: mockPrisma }));
 
 import exportHandler from "@/pages/api/export/full";

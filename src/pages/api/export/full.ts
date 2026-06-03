@@ -1,15 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { buildModelWorkbook } from "@/exports/workbook";
 import { prisma } from "@/lib/db";
-import { loadModel } from "@/lib/model";
+import { loadModel, withDbRetry } from "@/lib/model";
 
 export default async function handler(_req: NextApiRequest, res: NextApiResponse) {
   const data = await loadModel();
-  const [assumptions, recipes, productPackaging] = await Promise.all([
-    prisma.assumption.findMany(),
-    prisma.recipeItem.findMany({ include: { ingredient: true, product: true } }),
-    prisma.productPackaging.findMany({ include: { packaging: true, product: true } })
-  ]);
+  const assumptions = await withDbRetry(() => prisma.assumption.findMany());
+  const recipes = await withDbRetry(() => prisma.recipeItem.findMany({ include: { ingredient: true, product: true } }));
+  const productPackaging = await withDbRetry(() => prisma.productPackaging.findMany({ include: { packaging: true, product: true } }));
   const inputUnits = [
     { field: "workingDaysPerMonth", unit: "дней / мес", note: "1-31" },
     { field: "avgOrdersPerDay", unit: "заказов / день", note: ">= 0" },

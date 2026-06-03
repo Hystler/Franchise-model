@@ -39,7 +39,13 @@ npm run dev
 
 Откройте `http://localhost:3000`. Если порт занят, Next.js предложит следующий.
 
-Seed создаёт базовые `StoreInput`, `TaxSettings`, `FranchiseSettings`, импортирует SKU из `public/scrape_artifacts/scraped_menu.json` как `IMPORTED_MENU` и не создаёт фейковые рецептуры или закупочные себестоимости.
+Seed создаёт демонстрационный набор editable assumptions: `StoreInput`, `TaxSettings`, `FranchiseSettings`, SKU, ингредиенты, упаковку, рецептуры, OPEX и CAPEX. Он предназначен для портфолио-демо и не запускается автоматически на build/deploy.
+
+### Demo seed
+
+`npm run db:seed` now fills the app with an idempotent demo dataset for portfolio/recruiting use: 15 SKU, demo ingredients, packaging, recipes, Store Model inputs, OPEX, CAPEX and Franchise Mode assumptions.
+
+The numbers are deliberately illustrative. They are meant to make the dashboard, unit economics, checks, franchise calculator and XLSX export look like a live product demo. They are editable by the user and are not a real franchise valuation, financial recommendation or investment advice.
 
 ## SKU
 
@@ -372,7 +378,7 @@ npm run scrape
 
 Scraper — локальный script. Он пишет artifacts в `public/scrape_artifacts` и не запускается на Vercel автоматически. Для production seed используется JSON-выгрузка меню, а все пользовательские данные хранятся в PostgreSQL.
 
-Импортированные SKU не теряются при повторном импорте или `npm run db:seed`: seed обновляет существующие позиции по `productUrl` или паре `category + name`.
+Импортированные SKU не теряются при повторном импорте. Demo seed обновляет свои демо-позиции по паре `category + name` и стабильным `demo-*` id для справочников и связей.
 
 ## Проценты
 

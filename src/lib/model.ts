@@ -4,10 +4,41 @@ import { calculateSensitivity } from "@/calculations/sensitivity";
 import { prisma } from "@/lib/db";
 import type { CapexInput, OpexInput, ProductInput, SourceKind, StoreInputs, TaxInputs } from "@/models/financial";
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function isTransientDbError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const maybeError = error as { code?: string; errorCode?: string; message?: string };
+  const message = String(maybeError.message ?? "");
+  return (
+    maybeError.code === "P1001" ||
+    maybeError.errorCode === "P1001" ||
+    message.includes("Can't reach database server") ||
+    message.includes("Error in PostgreSQL connection")
+  );
+}
+
+export async function withDbRetry<T>(operation: () => Promise<T>): Promise<T> {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!isTransientDbError(error) || attempt === maxAttempts) {
+        throw error;
+      }
+      await sleep(750 * attempt);
+    }
+  }
+
+  throw new Error("Database operation failed after retries.");
+}
+
 export async function ensureDefaults() {
-  const storeCount = await prisma.storeInput.count();
+  const storeCount = await withDbRetry(() => prisma.storeInput.count());
   if (!storeCount) {
-    await prisma.storeInput.create({
+    await withDbRetry(() => prisma.storeInput.create({
       data: {
         id: "default-store",
         location: "editable assumption",
@@ -24,36 +55,36 @@ export async function ensureDefaults() {
         aggregatorCommissionRate: 0,
         source: "ASSUMPTION"
       }
-    });
+    }));
   }
-  const taxCount = await prisma.taxSettings.count();
+  const taxCount = await withDbRetry(() => prisma.taxSettings.count());
   if (!taxCount) {
-    await prisma.taxSettings.create({ data: { id: "default-tax", taxSystem: "editable assumption", source: "ASSUMPTION" } });
+    await withDbRetry(() => prisma.taxSettings.create({ data: { id: "default-tax", taxSystem: "editable assumption", source: "ASSUMPTION" } }));
   }
-  const franchiseCount = await prisma.franchiseSettings.count();
+  const franchiseCount = await withDbRetry(() => prisma.franchiseSettings.count());
   if (!franchiseCount) {
-    await prisma.franchiseSettings.create({ data: { id: "default-franchise", source: "ASSUMPTION" } });
+    await withDbRetry(() => prisma.franchiseSettings.create({ data: { id: "default-franchise", source: "ASSUMPTION" } }));
   }
 }
 
 export async function loadModel() {
   await ensureDefaults();
-  const [productsRaw, ingredientsRaw, packagingRaw, storeRaw, opexRaw, capexRaw, taxRaw, franchiseRaw] = await Promise.all([
+  const productsRaw = await withDbRetry(() =>
     prisma.product.findMany({
       orderBy: [{ category: "asc" }, { name: "asc" }],
       include: {
         recipes: { include: { ingredient: true } },
         packagingLinks: { include: { packaging: true } }
       }
-    }),
-    prisma.ingredient.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] }),
-    prisma.packaging.findMany({ orderBy: { name: "asc" } }),
-    prisma.storeInput.findFirst(),
-    prisma.opexItem.findMany({ orderBy: { category: "asc" } }),
-    prisma.capexItem.findMany({ orderBy: { category: "asc" } }),
-    prisma.taxSettings.findFirst(),
-    prisma.franchiseSettings.findFirst()
-  ]);
+    })
+  );
+  const ingredientsRaw = await withDbRetry(() => prisma.ingredient.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] }));
+  const packagingRaw = await withDbRetry(() => prisma.packaging.findMany({ orderBy: { name: "asc" } }));
+  const storeRaw = await withDbRetry(() => prisma.storeInput.findFirst());
+  const opexRaw = await withDbRetry(() => prisma.opexItem.findMany({ orderBy: { category: "asc" } }));
+  const capexRaw = await withDbRetry(() => prisma.capexItem.findMany({ orderBy: { category: "asc" } }));
+  const taxRaw = await withDbRetry(() => prisma.taxSettings.findFirst());
+  const franchiseRaw = await withDbRetry(() => prisma.franchiseSettings.findFirst());
 
   const products: ProductInput[] = productsRaw.map((product) => ({
     id: product.id,

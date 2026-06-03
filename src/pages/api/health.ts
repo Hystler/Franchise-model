@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/db";
+import { withDbRetry } from "@/lib/model";
 
 type HealthResponse = {
   status: "ok" | "error";
@@ -9,7 +10,7 @@ type HealthResponse = {
 
 export default async function handler(_req: NextApiRequest, res: NextApiResponse<HealthResponse>) {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await withDbRetry(() => prisma.$queryRaw`SELECT 1`);
     return res.status(200).json({
       status: "ok",
       db: "connected",
